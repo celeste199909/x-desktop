@@ -1,0 +1,21 @@
+{
+  "pluginName": "X桌面",
+  "description": " windows 桌面解决方案。双击 Ctrl 即可唤出桌面, 单击 Ctrl 键隐藏。",
+  "author": "无限蔚蓝",
+  "version": "1.1.0",
+  "preload": "preload.js",
+  "logo": "logo.png",
+  "platform": ["win32"],
+  "pluginSetting": {
+    "single": true,
+    "height": 0
+  },
+  "features": [  
+    {
+      "code": "desktop",
+      "icon": "logo.png",
+      "platform": ["win32"],
+      "cmds": ["X桌面"]
+    }
+  ]
+}

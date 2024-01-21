@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* * {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+} */
+html {
+  /* background-color: transparent !important; */
+}
+body {
+  margin: 0;
+  padding: 0;
+  /* background-color: transparent !important; */
+  background-image: url('./assets/wallpapers/mountains.jpg');
+  /* background-image: url('file:///C:/Users/celeste/Pictures/2h-media-oUw0fIRzhr4-unsplash.jpg');  */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+#app {
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.8);
+  /* background-color: liner-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)); */
+  /* filter: blur(10px); */
+  /* backdrop-filter: blur(20px); */
+}
+
+/* 定义滚动条的样式 */
+::-webkit-scrollbar {
+  width: 0; /* 滚动条宽度 */
+}
+
+/* 定义滚动条轨道的样式 */
+::-webkit-scrollbar-track {
+  background-color: #f1f1f100; /* 滚动条轨道背景色 */
+}
+
+/* 定义滚动条滑块的样式 */
+::-webkit-scrollbar-thumb {
+  background-color: #45454548; /* 滚动条滑块颜色 */
+  border-radius: 5px; /* 滑块圆角 */
+}
+
+/* 鼠标悬停在滚动条上时的样式 */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* 鼠标悬停时滑块颜色 */
+}
+
+/* 水平滚动条样式 */
+::-webkit-scrollbar-horizontal {
+  height: 10px; /* 水平滚动条高度 */
+}
+
+/* 垂直滚动条样式 */
+::-webkit-scrollbar-vertical {
+  width: 10px; /* 垂直滚动条宽度 */
+}
