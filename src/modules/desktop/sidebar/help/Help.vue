@@ -13,9 +13,6 @@
 </template>
 
 <script setup>
-// function handleClickManual() {
-//   utools.shellOpenExternal("https://sourl.cn/dgwfig");
-//   window.hideDesk();
-// }
+
 </script>
 <style scoped></style>

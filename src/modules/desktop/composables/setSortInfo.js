@@ -1,12 +1,12 @@
 import { inject } from "vue";
 
-export function useUpdateSortInfo() {
+export function useSetSortInfo() {
 
     const pages = inject("pages");
     // const setting = inject("setting");
 
     // 更新页面排序信息
-    function updateSortInfo() {
+    function setSortInfo() {
         let pagesSortInfo = [];
         pages.value.forEach((page, pageIndex) => {
             let pageSortInfo = [];
@@ -16,10 +16,11 @@ export function useUpdateSortInfo() {
             pagesSortInfo.push(pageSortInfo);
         });
         console.log("pagesSortInfo", pagesSortInfo);
-        setting.value.sortInfo = pagesSortInfo;
+        // setting.value.sortInfo = pagesSortInfo;
+        utools.dbStorage.setItem("desktopSortInfo", pagesSortInfo);
     }
 
     return {
-        updateSortInfo
+        setSortInfo
     }
 }

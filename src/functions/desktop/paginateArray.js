@@ -1,11 +1,15 @@
-
+import {
+    getDesktopSortInfo,
+    getDesktopLayout,
+} from "./desktopAppearance.js";
 // handleIcons
 // [ [ {}, {}, ...], []... ]
-export function paginateArray(handleIcons, pageSize, localSetting) {
-
+const paginateArray = function (handleIcons) {
     // sortInfo
     // [ [ rawName, rawName, ...], []... ]
-    const sortInfo = localSetting.sortInfo;
+    const sortInfo = getDesktopSortInfo();
+    console.log("sortInfo", sortInfo);
+    const pageSize = getDesktopLayout().pageCapacity;
 
     // 如果没有排序信息，根据页面容量，对数组进行分页
     if (sortInfo.length === 0) {
@@ -63,11 +67,15 @@ export function paginateArray(handleIcons, pageSize, localSetting) {
                         paginatedArray[currentPageIndex].push(icon);
                     }
                 }
-                
+
             });
         }
         console.log("有排序信息paginatedArray", paginatedArray);
         return paginatedArray;
     }
 
+}
+
+export {
+    paginateArray
 }

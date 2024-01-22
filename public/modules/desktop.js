@@ -34,3 +34,4 @@ window.getDesktopIcons = function (callback) {
   });
 
 };
+

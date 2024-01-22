@@ -33,6 +33,7 @@
 
 <script setup>
 import { defineProps, inject, ref, computed } from "vue";
+import { getDesktopLayout } from "../../../functions/desktop/desktopAppearance";
 
 const props = defineProps({
   icon: {
@@ -47,7 +48,7 @@ const props = defineProps({
 });
 
 const utools = inject("utools");
-const layout = inject("layout");
+const layout = ref(getDesktopLayout());
 const iconImage = ref();
 const position = { x: 0, y: 0 };
 const isOnQuickSearchMode = inject("isOnQuickSearchMode");

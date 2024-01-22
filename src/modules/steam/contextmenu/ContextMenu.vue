@@ -55,7 +55,8 @@ const menuOptions = ref([
 // 刷新
 function handleClickRefresh() {
   console.log("刷新");
-  init();
+  // init();
+  initDesktop();
 }
 
 // 监听鼠标右键

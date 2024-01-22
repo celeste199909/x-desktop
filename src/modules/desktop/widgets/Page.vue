@@ -32,9 +32,10 @@
 import { inject, ref, defineProps, defineEmits } from "vue";
 import { VueDraggable } from "vue-draggable-plus";
 import Application from "@/modules/desktop/icons/Application.vue";
+import { getDesktopLayout } from "@/functions/desktop/desktopAppearance";
 // 组合式函数
-// import { useUpdateSortInfo } from "@/composables/desktop/updateSortInfo.js";
-// const { updateSortInfo } = useUpdateSortInfo();
+import { useSetSortInfo } from "@/modules/desktop/composables/setSortInfo.js";
+const { setSortInfo } = useSetSortInfo();
 
 // props
 const props = defineProps({
@@ -57,7 +58,7 @@ const emit = defineEmits(["setCurrentPage", "setIsDragging"]);
 
 // 注入 来自 App.vue
 const pages = inject("pages");
-const layout = inject("layout");
+const layout = ref(getDesktopLayout());
 const moveToPage = inject("moveToPage");
 
 // app容器 grid 布局
@@ -116,7 +117,7 @@ function onStart(event) {
 function onEnd(event) {
   emit("setIsDragging", false);
   console.log("pages.value", pages.value);
-  // updateSortInfo();
+  setSortInfo();
 }
 </script>
 <style scoped>

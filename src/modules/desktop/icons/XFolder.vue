@@ -19,6 +19,7 @@
 import { defineProps, ref, inject, computed } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import Application from "./Application.vue";
+import { getDesktopLayout } from '@/functions/desktop/desktopAppearance';
 
 defineProps({
     xfolder: {
@@ -30,7 +31,7 @@ defineProps({
 const isContract = ref(true);
 
 // 注入
-const layout = inject('layout')
+const layout = ref(getDesktopLayout())
 const pages = inject('pages')
 const currentPage = inject('currentPage')
 

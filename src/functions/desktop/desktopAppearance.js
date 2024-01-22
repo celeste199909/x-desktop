@@ -1,5 +1,3 @@
-import { get } from "lodash";
-
 /**
  * @description: 桌面外观数据
  * @typedef {Object} DesktopAppearance
@@ -9,7 +7,7 @@ import { get } from "lodash";
  * @property {Array} localBgImage 本地背景图片
  * @property {Number} bgOpacity 背景透明度
  */
-const defaulDesktopAppearance = {
+const defaultDesktopAppearance = {
     theme: "auto",
     bgColor: [
         {
@@ -85,25 +83,25 @@ const defaulDesktopAppearance = {
  * @description: 获取本地外观数据
  * @return {DesktopAppearance}
  */
-getDesktopAppearance = function () {
+const getDesktopAppearance = function () {
     const desktopAppearance = utools.dbStorage.getItem("desktopAppearance");
     if (!desktopAppearance) {
-        utools.dbStorage.setItem("desktopAppearance", defaulDesktopAppearance);
-        return defaulDesktopAppearance;
+        utools.dbStorage.setItem("desktopAppearance", defaultDesktopAppearance);
+        return defaultDesktopAppearance;
     } else {
         console.log("desktopAppearance", desktopAppearance);
         return desktopAppearance;
     }
 }
 
-/**
- * @description: 重置本地外观数据
- * @return {DesktopAppearance}
- */
-resetDesktopAppearance = function () {
-    utools.dbStorage.setItem("desktopAppearance", defaulDesktopAppearance);
-    return defaulDesktopAppearance;
-}
+// /**
+//  * @description: 重置本地外观数据
+//  * @return {DesktopAppearance}
+//  */
+// const resetDesktopAppearance = function () {
+//     utools.dbStorage.setItem("desktopAppearance", defaultDesktopAppearance);
+//     return defaultDesktopAppearance;
+// }
 
 // 桌面布局
 /**
@@ -122,7 +120,7 @@ resetDesktopAppearance = function () {
  * @property {Number} column 列数
  * @property {Number} pageCapacity 页面容量
  */
-getDesktopLayout = function () {
+const getDesktopLayout = function () {
     let layout = {
         width: document.documentElement.clientWidth,
         height: document.documentElement.clientHeight,
@@ -159,7 +157,7 @@ getDesktopLayout = function () {
  * @description: 获取本地桌面数据
  * @return {Array} [ ["iconRawName", ...] , ["iconRawName", ...] ]
  */
-getDesktopSortInfo = function () {
+const getDesktopSortInfo = function () {
     const localSortInfo = utools.dbStorage.getItem("desktopSortInfo");
     if (!localSortInfo) {
         utools.dbStorage.setItem("desktopSortInfo", []);
@@ -171,9 +169,9 @@ getDesktopSortInfo = function () {
 }
 
 export {
-    defaulDesktopAppearance,
+    defaultDesktopAppearance,
+    getDesktopSortInfo,
     getDesktopAppearance,
     resetDesktopAppearance,
     getDesktopLayout,
-    defaulDesktopSortInfo
 }

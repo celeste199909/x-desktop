@@ -32,7 +32,7 @@ export function handleRawIcons(rawIcons) {
   return handledIcons;
 }
 
-// 函数用于获取图标类型
+// 用于获取图标类型
 function getIconType(rawName) {
   const splitList = rawName.split(".");
   const suffix = splitList.pop();
@@ -45,7 +45,7 @@ function getIconType(rawName) {
   }
 }
 
-// 函数用于处理显示的名字获取搜索关键词
+// 用于处理显示的名字获取搜索关键词
 export function getSearchKeywords(showName) {
   let keywords = [];
   if (strContainsChinese(showName)) {
@@ -71,14 +71,14 @@ export function getSearchKeywords(showName) {
   return keywords;
 }
 
-// 函数用于检测字符串是中文还是英文
+// 用于检测字符串是中文还是英文
 function strContainsChinese(str) {
   // 检查字符串中是否有中文字符
   const containsChinese = /[\u4e00-\u9fff]/.test(str);
   return containsChinese;
 }
 
-// 函数用于提取字符串中的首字母
+// 用于提取字符串中的首字母
 function extractInitials(str) {
   // 使用正则表达式将字符串拆分为单词数组
   const words = str.split(/[\s-_]+/);

@@ -6,7 +6,7 @@
       left: contextMenuPosition.x + 'px',
       top: contextMenuPosition.y + 'px',
     }"
-    class="context-menu select-none px-2 py-3 rounded-lg backdrop-blur-sm bg-slate-200/90 dark:bg-slate-900/90 fixed w-40 z-50"
+    class="context-menu select-none px-2 py-3 rounded-lg backdrop-blur-sm bg-slate-200/90 dark:bg-slate-900/90 fixed w-40 z-100"
   >
     <!-- 桌面菜单 -->
     <template v-for="item in menuOptions" :key="item.name">
@@ -34,7 +34,6 @@
 <script setup>
 import { inject, ref, computed, defineProps, defineEmits } from "vue";
 import { nanoid } from "nanoid";
-import { getSearchKeywords } from "@/functions/handleRawIcons.js";
 import showToast from "@/components/toast/index";
 import { useGlobalContextMenu } from "@/composables/globalContextMenu.js";
 
@@ -54,7 +53,6 @@ const props = defineProps({
 });
 
 const pages = inject("pages");
-const layout = inject("layout");
 const utools = inject("utools");
 const emit = defineEmits(["showContextMenu", "showSidebar"]);
 const clickTarget = ref(null); // 点击的目标
@@ -93,11 +91,6 @@ const menuOptions = ref([
     name: "打开",
     enabled: ["icon"],
     handler: openApp,
-  },
-  {
-    name: "编辑",
-    enabled: ["icon"],
-    handler: () => {},
   },
   {
     name: "隐藏图标",
