@@ -14,6 +14,7 @@
       }"
       :animation="150"
       ghostClass="ghost"
+      :forceFallback="true"
       draggable=".draggable"
       v-model="pages[pageIndex]"
       :style="gridStyle"
@@ -22,17 +23,22 @@
       @move="onMove"
     >
       <div v-for="item in pages[pageIndex]" :key="item.id" class="draggable">
-        <Application :icon="item" :place="'on-desktop'" />
+        <Application
+          v-if="isPathActive(item)"
+          :icon="item"
+          :place="'on-desktop'"
+        />
       </div>
     </VueDraggable>
   </div>
 </template>
 
 <script setup>
-import { inject, ref, defineProps, defineEmits } from "vue";
+import { inject, computed,  ref, defineProps, defineEmits } from "vue";
 import { VueDraggable } from "vue-draggable-plus";
 import Application from "@/modules/desktop/icons/Application.vue";
 import { getDesktopLayout } from "@/functions/desktop/desktopAppearance";
+import _ from "lodash";
 // 组合式函数
 import { useSetSortInfo } from "@/modules/desktop/composables/setSortInfo.js";
 const { setSortInfo } = useSetSortInfo();
@@ -49,9 +55,24 @@ const props = defineProps({
   },
   isDragging: {
     type: Boolean,
-    default: false,
+    default: true,
+  },
+  desktopFunction: {
+    type: Object,
+    required: true,
   },
 });
+// iconPaths: [{
+//             id:"desktop",
+//             name: "桌面",
+//             path: getUserDesktopPath(),
+//             active: true,
+//     }]
+const iconPaths = computed(() => props.desktopFunction.iconPaths);
+
+function isPathActive(icon) {
+  return _.find(iconPaths.value, { id: icon.fromPathId }).active;
+}
 
 // emit
 const emit = defineEmits(["setCurrentPage", "setIsDragging"]);

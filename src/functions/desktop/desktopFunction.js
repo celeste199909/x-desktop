@@ -6,6 +6,7 @@ const defaultDesktopFunction = {
     hideShotcutKey: ["Control", ""],
     iconPaths: [
         {
+            id:"desktop",
             name: "桌面",
             path: getUserDesktopPath(),
             active: true,

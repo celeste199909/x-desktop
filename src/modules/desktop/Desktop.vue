@@ -12,6 +12,7 @@
           @setCurrentPage="setCurrentPage"
           :isDragging="isDragging"
           @setIsDragging="setIsDragging"
+          :desktopFunction="desktopFunction"
         />
       </div>
     </div>
@@ -54,6 +55,10 @@ import { watchDeep } from "@vueuse/core";
 // 工具
 import { getDesktopAppearance } from "@/functions/desktop/desktopAppearance";
 import { getDesktopFunction } from "@/functions/desktop/desktopFunction";
+// 分页
+// import { paginateArray } from "@/functions/desktop/paginateArray";
+// pages.value = paginateArray(handleIcons); // 分页
+
 
 // 来自 App.vue
 const pages = inject("pages");
@@ -88,6 +93,14 @@ provide("setDesktopAppearance", setDesktopAppearance);
 
 
 // 功能数据与设置 ------------------------
+// desktopFunction {
+//     hideShotcutKey: ["Control", ""],
+//     iconPaths: [{
+//             id:"desktop",
+//             name: "桌面",
+//             path: getUserDesktopPath(),
+//             active: true,
+//     }]}
 const desktopFunction = ref(getDesktopFunction()); // 桌面功能
 watchDeep(desktopFunction, (newVal) => {  // 监听 desktopFunction, 更改时保存到本地
   utools.dbStorage.setItem(

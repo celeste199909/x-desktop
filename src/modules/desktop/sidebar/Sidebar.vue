@@ -94,6 +94,11 @@ const content = ref([
   [Help],
 ]);
 
+// // 自定义路径
+// const iconPaths = computed(() => {
+//   return desktopFunction.iconPaths;
+// });
+
 // function handleClickClearSetting() {
 //   utools.dbStorage.removeItem("setting");
 //   init();

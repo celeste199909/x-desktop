@@ -1,3 +1,4 @@
+
 /**
  * @description: 桌面外观数据
  * @typedef {Object} DesktopAppearance
@@ -11,50 +12,60 @@ const defaultDesktopAppearance = {
     theme: "auto",
     bgColor: [
         {
+            id: "iyjoSmXca",
             color: "#000000",
             current: false,
         },
         {
+            id: "j1a6GKp5euJ",
             color: ["rgb(33, 147, 176)", "rgb(109, 213, 237)"],
             direction: "to right",
             current: false,
         },
         {
+            id:"3l70C5",
             color: ["rgb(168, 192, 255)", "rgb(63, 43, 150)"],
             direction: "to right",
             current: false,
         },
         {
+            id: "ciNp4Inuok",
             color: ["rgb(52, 148, 230)", "rgb(236, 110, 173)"],
             direction: "to right",
             current: false,
         },
         {
+            id: "OkgUomwDmg",
             color: ["rgb(20, 30, 48)", "rgb(36, 59, 85)"],
             direction: "to right",
             current: false,
         },
         {
+            id: "3ayt51",
             color: ["rgb(211, 149, 155)", "rgb(191, 230, 186)"],
             direction: "to right",
             current: false,
         },
         {
+            id: "JIVIcshT",
             color: ["rgb(211, 149, 155)", "rgb(191, 230, 186)"],
             direction: "to right",
             current: false,
         },
         {
+            id: "FXpkYR14",
             color: ["rgb(71, 118, 230)", "rgb(142, 84, 233)"],
             direction: "to right",
             current: false,
         },
         {
+            id: "1KBBG2xNcm",
             color: ["rgb(0, 82, 212)", "rgb(151, 150, 240)", "rgb(251, 199, 212)"],
             direction: "to right",
             current: false,
         },
         {
+            id: "8h7B8jS4",
             color: ["rgb(0, 82, 212)", "rgb(75, 108, 183)", "rgb(24, 40, 72)"],
             direction: "to right",
             current: false,
@@ -62,16 +73,19 @@ const defaultDesktopAppearance = {
     ],
     bgImage: [
         {
+            id: "tzXza8DeoDs",
             current: true,
             name: "mountains.jpg",
         },
         {
+            id: "tObPJnj5DM7",
             current: false,
             name: "rain.jpg",
         },
     ],
     localBgImage: [
         // {
+        //     id: nanoid(),
         //     current: false,
         //     path: "C:\\Users\\celeste\\Pictures\\2h-media-oUw0fIRzhr4-unsplash.jpg",
         // },
