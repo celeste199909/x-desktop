@@ -9,7 +9,7 @@ import { onMounted } from "vue";
  * @param {Function} moveToPage 切换页面方法
  * @return {*}
  */
-export function useWheelToPage(currentModule, pages, currentPage, moveToPage ) {
+export function useWheelToPage(currentModule, pagedIcons, currentPage, moveToPage ) {
 
     onMounted(() => {
         document.addEventListener("wheel", wheelToPage);
@@ -27,7 +27,7 @@ export function useWheelToPage(currentModule, pages, currentPage, moveToPage ) {
         }
         if (e.deltaY > 0) {
             // 移到下一页
-            if (currentPage.value < pages.value.length - 1) {
+            if (currentPage.value < pagedIcons.value.length - 1) {
                 const newPage = currentPage.value + 1;
                 moveToPage({ pageIndex: newPage });
             }

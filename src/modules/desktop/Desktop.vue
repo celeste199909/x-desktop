@@ -4,15 +4,19 @@
     <div id="view" class="w-screen h-screen overflow-hidden flex flex-col">
       <div id="pages" class="h-full w-fit flex flex-row items-center">
         <Page
-          v-for="(page, index) in pages"
+          v-for="(page, index) in pagedIcons"
           :id="'page-' + index"
           :key="index"
+          :pagedIcons="pagedIcons"
           :pageIndex="index"
           :currentPage="currentPage"
           @setCurrentPage="setCurrentPage"
           :isDragging="isDragging"
           @setIsDragging="setIsDragging"
           :desktopFunction="desktopFunction"
+          :isOnQuickSearchMode="isOnQuickSearchMode"
+          :moveToPage="moveToPage"
+          :updateSortInfo="updateSortInfo"
         />
       </div>
     </div>
@@ -20,7 +24,10 @@
     <Sidebar
       :isShowSidebar="isShowSidebar"
       :desktopAppearance="desktopAppearance"
+      :setDesktopAppearance="setDesktopAppearance"
       :desktopFunction="desktopFunction"
+      :setDesktopFunction="setDesktopFunction"
+      :initDesktop="initDesktop"
     />
     <!-- 右键菜单 -->
     <ContextMenu
@@ -29,18 +36,37 @@
       :isShowSidebar="isShowSidebar"
       @showSidebar="showSidebar"
       :currentPage="currentPage"
+      :moveToPage="moveToPage"
     />
     <!-- 页面指示器 -->
-    <PageIndicator :currentPage="currentPage" />
+    <PageIndicator
+      :currentPage="currentPage"
+      :pagedIcons="pagedIcons"
+      :moveToPage="moveToPage"
+    />
     <!-- 左右检测区域 -->
     <SideArea />
     <!-- 快速搜索 -->
-    <QuickSearch :currentPage="currentPage" />
+    <QuickSearch
+      :pagedIcons="pagedIcons"
+      :currentPage="currentPage"
+      :moveToPage="moveToPage"
+      :isOnQuickSearchMode="isOnQuickSearchMode"
+      @setIsOnQuickSearchMode="setIsOnQuickSearchMode"
+    />
   </div>
 </template>
 
 <script setup>
-import { inject, onMounted, ref, provide } from "vue";
+import {
+  inject,
+  onMounted,
+  ref,
+  provide,
+  defineProps,
+  computed,
+  defineEmits,
+} from "vue";
 // 组件
 import Page from "@/modules/desktop/widgets/Page.vue";
 import PageIndicator from "@/modules/desktop/widgets/PageIndicator.vue";
@@ -52,57 +78,58 @@ import ContextMenu from "@/modules/desktop/contextmenu/ContextMenu.vue";
 import { useWheelToPage } from "@/modules/desktop/composables/wheelToPage.js";
 import { useMoveToPage } from "@/modules/desktop/composables/moveToPage.js";
 import { watchDeep } from "@vueuse/core";
+// 参数：pagedIcons, setDesktopSortInfo
+import {  useUpdateSortInfo } from "@/modules/desktop/composables/updateSortInfo.js";
 // 工具
 import { getDesktopAppearance } from "@/functions/desktop/desktopAppearance";
 import { getDesktopFunction } from "@/functions/desktop/desktopFunction";
+import { getDesktopSortInfo } from "@/functions/desktop/desktopSortInfo";
 // 分页
-// import { paginateArray } from "@/functions/desktop/paginateArray";
-// pages.value = paginateArray(handleIcons); // 分页
+import { paginateArray } from "@/functions/desktop/paginateArray";
+// 更新排序
 
+
+const props = defineProps({
+  // 处理过, 未经分页的图标
+  desktopIcons: {
+    type: Array,
+    required: true,
+  },
+  // 重新加载图标
+  initDesktop: {
+    type: Function,
+    required: true,
+  },
+});
 
 // 来自 App.vue
-const pages = inject("pages");
 const currentModule = inject("currentModule");
-// 桌面数据
-const isShowContextMenu = ref(false);
-const isShowSidebar = ref(false);
-const currentPage = ref(0);
-const isDragging = ref(false); // 用于控制拖拽时的样式（背景）
-const isOnQuickSearchMode = ref(false); // 搜索模式
-provide("isOnQuickSearchMode", isOnQuickSearchMode);  // 搜索模式
-// const desktopSortInfo = ref(getDesktopSortInfo()); // 桌面图标排序信息
 
-// 翻页功能
-const { moveToPage } = useMoveToPage(pages, setCurrentPage);
-provide("moveToPage", moveToPage);
-useWheelToPage(currentModule, pages, currentPage, moveToPage); // 滚轮翻页
+// 未经分页的图标，包括所有路径（不论是否启用）下的图标, 
+// const wholeDesktopIcons = computed(()=> props.desktopIcons);  
+const pagedIcons = ref([]); // 分页后的图标
+const computedPageIcons = computed(() => paginateArray(props.desktopIcons));
+watchDeep(computedPageIcons, (newVal) => {
+  pagedIcons.value = computedPageIcons.value;
+  // 分页完成时更新排序信息
+  updateSortInfo();
+});
 
-
-// 外观数据与设置 ------------------------
-const desktopAppearance = ref(getDesktopAppearance()); // 桌面外观
-watchDeep(desktopAppearance, (newVal) => {  // 监听 desktopAppearance, 更改时保存到本地
+// 桌面外观
+const desktopAppearance = ref(getDesktopAppearance());
+function setDesktopAppearance(newVal) {
+  desktopAppearance.value = newVal;
+}
+watchDeep(desktopAppearance, (newVal) => {
   utools.dbStorage.setItem(
     "desktopAppearance",
     JSON.parse(JSON.stringify(newVal))
   );
 });
-function setDesktopAppearance(newVal) {  // 设置桌面外观
-  desktopAppearance.value = newVal;
-}
-provide("setDesktopAppearance", setDesktopAppearance);
 
-
-// 功能数据与设置 ------------------------
-// desktopFunction {
-//     hideShotcutKey: ["Control", ""],
-//     iconPaths: [{
-//             id:"desktop",
-//             name: "桌面",
-//             path: getUserDesktopPath(),
-//             active: true,
-//     }]}
-const desktopFunction = ref(getDesktopFunction()); // 桌面功能
-watchDeep(desktopFunction, (newVal) => {  // 监听 desktopFunction, 更改时保存到本地
+// 桌面功能
+const desktopFunction = ref(getDesktopFunction());
+watchDeep(desktopFunction, (newVal) => {
   utools.dbStorage.setItem(
     "desktopFunction",
     JSON.parse(JSON.stringify(newVal))
@@ -111,41 +138,57 @@ watchDeep(desktopFunction, (newVal) => {  // 监听 desktopFunction, 更改时�
 function setDesktopFunction(newVal) {
   desktopFunction.value = newVal;
 }
-provide("setDesktopFunction", setDesktopFunction);
+watchDeep(desktopFunction.value.iconPaths, (newVal) => {
+  props.initDesktop();
+});
 
-
-// 供子组件更新的方法
-// 更新右键菜单显示状态
-/**
- * @param {boolean} value - 新的显示状态
- *
- */
-function showContextMenu(value) {
-  isShowContextMenu.value = value;
+// 桌面排序信息
+const desktopSortInfo = ref(getDesktopSortInfo());
+watchDeep(desktopSortInfo, (newVal) => {
+  utools.dbStorage.setItem(
+    "desktopSortInfo",
+    JSON.parse(JSON.stringify(newVal))
+  );
+});
+function setDesktopSortInfo(newVal) {
+  desktopSortInfo.value = newVal;
 }
-// 更新侧边栏显示状态
-/**
- * @param {boolean} value - 新的显示状态
- *
- */
-function showSidebar(value) {
-  isShowSidebar.value = value;
-}
-// 更新当前页面
-/**
- * @param {number} value - 新的页面索引
- *
- */
+// 更新排序信息
+const { updateSortInfo } = useUpdateSortInfo(pagedIcons, setDesktopSortInfo);
+// 当前页
+const currentPage = ref(0); // 当前页 emit: setCurrentPage
 function setCurrentPage(value) {
   currentPage.value = value;
 }
-// 更新拖拽状态
-/**
- * @param {boolean} value - 新的拖拽状态
- *
- */
+
+// 翻页功能
+const { moveToPage } = useMoveToPage(pagedIcons, setCurrentPage);
+useWheelToPage(currentModule, pagedIcons, currentPage, moveToPage); // 滚轮翻页
+
+// 右键菜单显隐
+const isShowContextMenu = ref(false); // 右键菜单 emit: showContextMenu
+function showContextMenu(value) {
+  isShowContextMenu.value = value;
+}
+
+// 侧边栏显隐
+const isShowSidebar = ref(false); // 侧边栏 emit: showSidebar
+function showSidebar(value) {
+  isShowSidebar.value = value;
+}
+
+
+
+// 是否处于拖拽状态
+const isDragging = ref(false); // 用于控制拖拽时的样式（背景） emit: setIsDragging
 function setIsDragging(value) {
   isDragging.value = value;
+}
+
+// 是否处于快速搜索模式
+const isOnQuickSearchMode = ref(false); // 搜索模式 emit: setIsOnQuickSearchMode
+function setIsOnQuickSearchMode(value) {
+  isOnQuickSearchMode.value = value;
 }
 </script>
 <style scoped></style>

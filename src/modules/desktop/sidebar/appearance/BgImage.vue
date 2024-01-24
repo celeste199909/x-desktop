@@ -55,11 +55,15 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  setDesktopAppearance: {
+    type: Function,
+    required: true,
+  },
 });
 
 const bgImage = computed(() => props.desktopAppearance.bgImage);
 const localBgImage = computed(() => props.desktopAppearance.localBgImage);
-const setDesktopAppearance = inject("setDesktopAppearance");
+
 const utools = inject("utools");
 
 onMounted(() => {
@@ -105,7 +109,7 @@ function setBgImage(name) {
       return item;
     }),
   };
-  setDesktopAppearance(newDesktopAppearance);
+  props.setDesktopAppearance(newDesktopAppearance);
 }
 
 // 设置本地背景
@@ -134,7 +138,7 @@ function setLocalBgImage(path) {
       return item;
     }),
   };
-  setDesktopAppearance(newDesktopAppearance);
+  props.setDesktopAppearance(newDesktopAppearance);
 }
 
 // 上传图片背景
@@ -169,7 +173,7 @@ function handleUploadImage() {
     localBgImage: newLocalBgImage,
   };
 
-  setDesktopAppearance(newDesktopAppearance);
+  props.setDesktopAppearance(newDesktopAppearance);
 }
 
 const getLocalImage = (path) => {

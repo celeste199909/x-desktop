@@ -1,10 +1,16 @@
 <template>
   <!-- desktop -->
-  <Desktop v-if="currentModule === 'desktop'" />
-  <!-- steam -->
-  <Steam v-if="currentModule === 'steam'" />
-  <!-- 浏览器 -->
-  <Browser v-if="currentModule === 'browser'" />
+  <KeepAlive>
+    <Desktop
+      v-if="currentModule === 'desktop'"
+      :desktopIcons="desktopIcons"
+      :initDesktop="initDesktop"
+    />
+    <!-- steam -->
+    <Steam v-else-if="currentModule === 'steam'" :steamApps="steamApps" />
+    <!-- 浏览器 -->
+    <Browser v-else-if="currentModule === 'browser'" />
+  </KeepAlive>
   <!-- 模块栏 -->
   <ModuleBar />
   <!-- 右键菜单 -->
@@ -21,28 +27,16 @@ import Browser from "@/modules/browser/Browser.vue";
 import ModuleBar from "@/components/ModuleBar.vue";
 // 工具
 import { handleRawIcons } from "@/functions/desktop/handleRawIcons";
-import { paginateArray } from "@/functions/desktop/paginateArray";
-
-// 获取数据
-
-
 // 第三方工具库
 import _ from "lodash";
 
 // 全局
 const currentModule = ref("desktop"); // 模块切换
-// 桌面模块
-const pages = ref([]); // 分页数据
-// steam 模块
-const steamApps = ref([]); // steam 应用
-
-// 全局
 provide("currentModule", currentModule); // 模块切换
 // 桌面模块
-provide("pages", pages);
-provide("initDesktop", initDesktop);
+const desktopIcons = ref([]); // 桌面图标
 // steam 模块
-provide("steamApps", steamApps);
+const steamApps = ref([]); // steam 应用
 
 // 获取桌面图标，分页
 onBeforeMount(() => {
@@ -51,27 +45,26 @@ onBeforeMount(() => {
   initBrowser();
 });
 
+// 获取原始图标数据
 function initDesktop() {
-  // 获取原始图标数据，并处理成需要的格式
   window.getDesktopIcons(function (rawIcons) {
-    const handleIcons = handleRawIcons(rawIcons); // 处理图标
-    pages.value = paginateArray(handleIcons); // 分页
-    console.log("initDesktop pages", pages.value);
+    desktopIcons.value = handleRawIcons(rawIcons); // 处理图标
+    // console.log("初始化 desktopIcons", desktopIcons.value);
   });
 }
 
+// 获取 steam 应用数据
 function initSteam() {
-  // 获取 steam 应用数据
   window.getSteamApps(function (apps) {
     steamApps.value = apps;
-    console.log("initSteam steamApps", steamApps.value);
+    // console.log("initSteam steamApps", steamApps.value);
   });
 }
 
+// 获取 chrome 书签数据
 function initBrowser() {
-  // 获取 chrome 书签数据
   window.getChromeBookmarks(function (bookmarks) {
-    console.log("initBrowser bookmarks", bookmarks);
+    // console.log("initBrowser bookmarks", bookmarks);
   });
 }
 </script>

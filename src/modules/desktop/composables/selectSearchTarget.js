@@ -1,16 +1,14 @@
 import { ref, inject, computed } from "vue";
-import { useMoveToPage } from "@/modules/desktop/composables/moveToPage.js";
+// import _ from "lodash";
 
-export function useSelectSearchTarget(timer, currentPage, isOnQuickSearchMode) {
-
-  const pages = inject("pages");
+export function useSelectSearchTarget(pagedIcons, currentPage, moveToPage, isOnQuickSearchMode, timer ) {
+  console.log("useSelectSearchTarget",pagedIcons, currentPage, moveToPage, isOnQuickSearchMode, timer);
   const utools = inject("utools");
-  const moveToPage = inject("moveToPage");
 
   const selectedTargetIndex = ref(0);
   const searchTargetList = computed(() => {
     let list = [];
-    pages.value.forEach((page) => {
+    pagedIcons.forEach((page) => {
       page.forEach((item) => {
         if (item.isSearchTarget) {
           list.push(item);
@@ -44,11 +42,11 @@ export function useSelectSearchTarget(timer, currentPage, isOnQuickSearchMode) {
         selectedTargetIndex.value = 0;
       }
       const nextTargetId = searchTargetList.value[selectedTargetIndex.value].id;
-      const nextTargetPageIndex = pages.value.findIndex((page) => {
+      const nextTargetPageIndex = pagedIcons.value.findIndex((page) => {
         return page.some((item) => item.id === nextTargetId);
       });
 
-      pages.value.forEach((page) => {
+      pagedIcons.value.forEach((page) => {
         page.forEach((item) => {
           if (item.id === nextTargetId) {
             item.isSelected = true;
@@ -70,11 +68,11 @@ export function useSelectSearchTarget(timer, currentPage, isOnQuickSearchMode) {
         selectedTargetIndex.value = searchTargetList.value.length - 1;
       }
       const nextTargetId = searchTargetList.value[selectedTargetIndex.value].id;
-      const nextTargetPageIndex = pages.value.findIndex((page) => {
+      const nextTargetPageIndex = pagedIcons.value.findIndex((page) => {
         return page.some((item) => item.id === nextTargetId);
       });
 
-      pages.value.forEach((page) => {
+      pagedIcons.value.forEach((page) => {
         page.forEach((item) => {
           if (item.id === nextTargetId) {
             item.isSelected = true;
@@ -100,7 +98,7 @@ export function useSelectSearchTarget(timer, currentPage, isOnQuickSearchMode) {
     e.preventDefault();
     // 如果是空格，打开选中的搜索目标
     const id = searchTargetList.value[selectedTargetIndex.value].id;
-    pages.value.forEach((page) => {
+    pagedIcons.value.forEach((page) => {
       page.forEach((item) => {
         if (item.id === id) {
           utools.shellOpenPath(item.realPath);
@@ -111,13 +109,14 @@ export function useSelectSearchTarget(timer, currentPage, isOnQuickSearchMode) {
   });
 
   function selectFirstTarget() {
+    console.log("selectFirstTarget",isOnQuickSearchMode);
     selectedTargetIndex.value = 0;
     if (isOnQuickSearchMode.value && searchTargetList.value.length > 0) {
       console.log("searchTargetList", searchTargetList.value);
       console.log("selectedTargetIndex", selectedTargetIndex.value);
       // 如果是在快速搜索状态下，且有搜索目标，选中第一个搜索目标
       const id = searchTargetList.value[selectedTargetIndex.value].id;
-      pages.value.forEach((page) => {
+      pagedIcons.value.forEach((page) => {
         page.forEach((item) => {
           if (item.id === id) {
             item.isSelected = true;

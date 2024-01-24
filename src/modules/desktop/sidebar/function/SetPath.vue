@@ -76,14 +76,21 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  setDesktopFunction: {
+    type: Function,
+    required: true,
+  },
+  initDesktop: {
+    type: Function,
+    required: true,
+  },
 });
 
 // iconPaths: [{ name: "桌面", path: getUserDesktopPath(), active: true,} ...]
 const iconPaths = ref(props.desktopFunction.iconPaths);
-const setDesktopFunction = inject("setDesktopFunction");
 
 watchDeep(iconPaths, (newVal) => {
-  setDesktopFunction({
+  props.setDesktopFunction({
     ...props.desktopFunction,
     iconPaths: newVal,
   });
@@ -113,15 +120,18 @@ function handleAddPath() {
     active: false,
   });
 }
+
 // 删除路径
 function removePath(id) {
   _.remove(iconPaths.value, { id });
 }
+
 // 切换启用状态
 function toggleActive(id) {
   const index = _.findIndex(iconPaths.value, { id });
   iconPaths.value[index].active = !iconPaths.value[index].active;
 }
+
 // 打开文件夹
 function openFolder(path) {
   utools.shellOpenPath(path);

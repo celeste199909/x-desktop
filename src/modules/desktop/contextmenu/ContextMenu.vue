@@ -38,6 +38,10 @@ import showToast from "@/components/toast/index";
 import { useGlobalContextMenu } from "@/composables/globalContextMenu.js";
 
 const props = defineProps({
+  pagedIcons: {
+    type: Array,
+    required: true,
+  },
   isShowContextMenu: {
     type: Boolean,
     default: false,
@@ -50,15 +54,17 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  moveToPage: {
+    type: Function,
+    required: true,
+  },
 });
 
-const pages = inject("pages");
 const utools = inject("utools");
 const emit = defineEmits(["showContextMenu", "showSidebar"]);
 const clickTarget = ref(null); // 点击的目标
 const contextMenuPosition = ref({ x: 0, y: 0 }); // 右键菜单位置
 const { globalContextMenuOptions } = useGlobalContextMenu(); // 全局右键菜单项
-const moveToPage = inject("moveToPage");
 
 const clickTargetType = computed(() => {
   if (!clickTarget.value) return null;
@@ -146,7 +152,7 @@ window.addEventListener("click", (e) => {
 // 打开图标
 function openApp(event) {
   const iconId = clickTarget.value.id.split("-")[2];
-  const icon = pages.value[props.currentPage].find(
+  const icon = props.pagedIcons[props.currentPage].find(
     (item) => item.id === iconId
   );
   utools.shellOpenPath(icon.realPath);
@@ -155,24 +161,26 @@ function openApp(event) {
 
 // 新建页面
 function newPage() {
-  pages.value.push([]);
-  moveToPage({ pageIndex: props.currentPage, transition: false });
+  console.log("新建页面");
+  // props.pagedIcons.push([]);
+  // props.moveToPage({ pageIndex: props.currentPage, transition: false });
 }
 
 // 删除页面
 function removePage() {
+  console.log("删除页面");
   // 如果页面为空,则删除
-  if (pages.value[props.currentPage].length === 0) {
-    pages.value.splice(props.currentPage, 1);
-    // 如果当前页面是最后一页，则切换至前一页
-    if (props.currentPage === pages.value.length) {
-      moveToPage({ pageIndex: props.currentPage - 1, transition: true });
-    }
-  } else {
-    // toast
-    console.log("当前页面不为空，不能删除");
-    showToast("页面不为空，不能删除");
-  }
+  // if (props.pagedIcons[props.currentPage].length === 0) {
+  //   props.pagedIcons.splice(props.currentPage, 1);
+  //   // 如果当前页面是最后一页，则切换至前一页
+  //   if (props.currentPage === props.pagedIcons.length) {
+  //     props.moveToPage({ pageIndex: props.currentPage - 1, transition: true });
+  //   }
+  // } else {
+  //   // toast
+  //   console.log("当前页面不为空，不能删除");
+  //   showToast("页面不为空，不能删除");
+  // }
 }
 
 // 打开桌面设置
@@ -185,7 +193,7 @@ function openDesktopSetting(event) {
 // // 点击新建文件夹
 // function handleClickNewFolder() {
 //   // 如果页面容量已满，提示不能再添加
-//   if (pages.value[currentPage.value].length >= layout.value.pageCapacity) {
+//   if (props.pagedIcons[currentPage.value].length >= layout.value.pageCapacity) {
 //     console.log("页面容量已满，不能再添加文件夹");
 //     return;
 //   }
@@ -199,7 +207,7 @@ function openDesktopSetting(event) {
 //     searchKeywords: getSearchKeywords("未命名文件夹"),
 //   };
 //   console.log("xfolder", xfolder);
-//   pages.value[currentPage.value].push(xfolder);
+//   props.pagedIcons[currentPage.value].push(xfolder);
 // }
 
 // function handleClickRemoveXFolder() {

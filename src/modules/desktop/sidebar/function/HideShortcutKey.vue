@@ -33,11 +33,13 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  setDesktopFunction: {
+    type: Function,
+    required: true,
+  },
 });
+
 const hideShotcutKey = computed(() => props.desktopFunction.hideShotcutKey);
-console.log("hideShotcutKey", hideShotcutKey.value);
-console.log(" props.desktopFunction", props.desktopFunction);
-const setDesktopFunction = inject("setDesktopFunction");
 
 // 设置快捷键
 function handleFocus(event) {
@@ -54,7 +56,7 @@ function handleFocus(event) {
       event.keyCode === 32
     ) {
       newHideShotcutKey[1] = "";
-      setDesktopFunction({
+      props.setDesktopFunction({
         ...props.desktopFunction,
         hideShotcutKey: newHideShotcutKey,
       });
@@ -67,7 +69,7 @@ function handleFocus(event) {
       newHideShotcutKey[1] = _.capitalize(event.key);
     }
     // event.target.value = _.capitalize(event.key);
-    setDesktopFunction({
+    props.setDesktopFunction({
       ...props.desktopFunction,
       hideShotcutKey: newHideShotcutKey,
     });

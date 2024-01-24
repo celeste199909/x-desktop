@@ -2,7 +2,7 @@
 // const { readdir, realpathSync } = require("fs");
 // const { ipcRenderer } = require("electron");
 
-console.log("加载 functions.js")
+// console.log("加载 functions.js")
 
 // const { exec } = require('child_process');
 

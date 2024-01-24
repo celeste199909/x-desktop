@@ -36,10 +36,14 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  setDesktopAppearance: {
+    type: Function,
+    required: true,
+  },
 });
 
 const bgColor = computed(() => props.desktopAppearance.bgColor);
-const setDesktopAppearance = inject("setDesktopAppearance");
+
 onMounted(() => {
   updateBgColor();
 });
@@ -74,7 +78,7 @@ function setBgColor(item) {
       return x;
     }),
   };
-  setDesktopAppearance(newDesktopAppearance);
+  props.setDesktopAppearance(newDesktopAppearance);
   // 设置背景色
   if (Array.isArray(item.color)) {
     document.body.style.background = `linear-gradient(${item.direction}, ${item.color[0]}, ${item.color[1]})`;

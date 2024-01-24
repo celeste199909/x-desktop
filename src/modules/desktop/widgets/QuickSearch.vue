@@ -7,30 +7,32 @@
   </div>
 </template>
 <script setup>
-import { inject, onMounted, onUnmounted, ref, defineProps } from "vue";
+import { onMounted, onUnmounted, ref, defineProps, defineEmits,computed } from "vue";
 // 组合式函数
-import { useSelectSearchTarget } from "@/modules/desktop/composables/selectSearchTarget.js";
 
 const props = defineProps({
+  pagedIcons: {
+    type: Array,
+    required: true,
+  },
   currentPage: {
     type: Number,
     default: 0,
   },
+  moveToPage: {
+    type: Function,
+    required: true,
+  },
+  isOnQuickSearchMode: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const pages = inject("pages");
-const isOnQuickSearchMode = inject("isOnQuickSearchMode");
+const emit = defineEmits(["setIsOnQuickSearchMode"]);
 
 const inputText = ref("");
 let timer = ref(null);
-
-// 组合函数
-const { selectFirstTarget } = useSelectSearchTarget(
-  timer,
-  props.currentPage,
-  isOnQuickSearchMode
-);
-// 搜索结果
 
 // 监听键盘事件
 function quickSearch(event) {
@@ -38,14 +40,16 @@ function quickSearch(event) {
   if (!isAllowedKey(keyCode)) return;
 
   clearTimeout(timer.value);
-  if (!isOnQuickSearchMode.value) isOnQuickSearchMode.value = true;
+  if (!props.isOnQuickSearchMode) {
+    emit("setIsOnQuickSearchMode", true);
+  }
 
   // 如果是退格键，删除最后一个字符
   if (keyCode === "Backspace" || keyCode === 8) {
     inputText.value = inputText.value.slice(0, -1);
     // 如果删除完了，隐藏
     if (!inputText.value) {
-      isOnQuickSearchMode.value = false;
+      emit("setIsOnQuickSearchMode", false);
     }
     updataSearchTarget();
     return;
@@ -56,7 +60,7 @@ function quickSearch(event) {
 
   timer.value = setTimeout(() => {
     inputText.value = "";
-    isOnQuickSearchMode.value = false;
+    emit("setIsOnQuickSearchMode", false);
   }, 6000);
 
   updataSearchTarget();
@@ -71,7 +75,7 @@ onUnmounted(() => {
 
 // 更新搜索结果
 function updataSearchTarget() {
-  pages.value.forEach((page, pageIndex) => {
+  props.pagedIcons.forEach((page, pageIndex) => {
     page.forEach((element, index) => {
       // 如果输入内容为空，返回
       if (!inputText.value) {
@@ -90,7 +94,7 @@ function updataSearchTarget() {
       }
     });
   });
-  selectFirstTarget();
+  // selectFirstTarget();
 }
 
 function isAllowedKey(keyCode) {

@@ -49,10 +49,14 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  setDesktopAppearance: {
+    type: Function,
+    required: true,
+  },
 });
 
 const utools = inject("utools");
-const setDesktopAppearance = inject("setDesktopAppearance");
+
 onMounted(() => {
   setTheme(props.desktopAppearance.theme);
 });
@@ -72,7 +76,7 @@ function setTheme(theme) {
     ...props.desktopAppearance,
     theme: theme,
   };
-  setDesktopAppearance(newDesktopAppearance);
+  props.setDesktopAppearance(newDesktopAppearance);
 }
 </script>
 <style scoped></style>

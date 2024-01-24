@@ -13,14 +13,14 @@
         :key="index"
         @click="curTabIndex = index"
         :class="[index === curTabIndex ? 'active' : '']"
-        class="tab flex justify-center items-center "
+        class="tab flex justify-center items-center"
       >
         {{ item }}
       </div>
     </div>
     <!-- 内容 -->
     <div class="overflow-y-scroll flex-1">
-      <!-- 外观 -->
+      <!-- 外观设置部分----------------------  -->
       <div
         v-show="curTabIndex === 0"
         class="appearance flex flex-col items-center p-2"
@@ -29,19 +29,25 @@
           <component
             :is="com"
             :desktopAppearance="desktopAppearance"
+            :setDesktopAppearance="setDesktopAppearance"
           ></component>
         </template>
       </div>
-      <!-- 功能 -->
+      <!-- 功能设置部分---------------------- -->
       <div
         v-show="curTabIndex === 1"
         class="appearance flex flex-col items-center p-2"
       >
         <template v-for="(com, index) in content[1]" :key="index">
-          <component :is="com" :desktopFunction="desktopFunction"></component>
+          <component
+            :is="com"
+            :desktopFunction="desktopFunction"
+            :setDesktopFunction="setDesktopFunction"
+            :initDesktop="initDesktop"
+          ></component>
         </template>
       </div>
-      <!-- 帮助 -->
+      <!-- 帮助部分---------------------- -->
       <div
         v-show="curTabIndex === 2"
         class="appearance flex flex-col items-center p-2"
@@ -55,7 +61,7 @@
 </template>
 
 <script setup>
-import { inject, ref, defineProps } from "vue";
+import { inject, ref, defineProps, defineEmits } from "vue";
 // 外观
 import Theme from "./appearance/Theme.vue";
 import BgColor from "./appearance/BgColor.vue";
@@ -78,9 +84,21 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  setDesktopAppearance: {
+    type: Function,
+    default: () => {},
+  },
   desktopFunction: {
     type: Object,
     default: () => ({}),
+  },
+  setDesktopFunction: {
+    type: Function,
+    default: () => {},
+  },
+  initDesktop: {
+    type: Function,
+    default: () => {},
   },
 });
 
@@ -93,17 +111,6 @@ const content = ref([
   [SetPath, HideShortcutKey],
   [Help],
 ]);
-
-// // 自定义路径
-// const iconPaths = computed(() => {
-//   return desktopFunction.iconPaths;
-// });
-
-// function handleClickClearSetting() {
-//   utools.dbStorage.removeItem("setting");
-//   init();
-// initDesktop();
-// }
 </script>
 <style scoped>
 .tab {
@@ -126,6 +133,4 @@ const content = ref([
   color: rgb(51, 136, 255);
   border-bottom: 3px solid rgb(51, 136, 255);
 }
-
-
 </style>

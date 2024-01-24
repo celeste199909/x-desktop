@@ -3,7 +3,7 @@ import { watchDeep } from '@vueuse/core'
 import { ref } from 'vue'
 
 export function useSetBg(desktopAppearance, setDesktopAppearance) {
-    console.log('desktopAppearance11', desktopAppearance.value);
+    // console.log('desktopAppearance11', desktopAppearance.value);
     
     const bgColor = ref(desktopAppearance.value.bgColor)
     const bgImage = ref(desktopAppearance.value.bgImage)
@@ -31,9 +31,9 @@ export function useSetBg(desktopAppearance, setDesktopAppearance) {
     })
 
     const setBgColor = function (bgColorItem) {
-        console.log('设置bgColorItem', bgColorItem);
-        console.log('bgColor', bgColor);
-        console.log('desktopAppearance11---', desktopAppearance);
+        // console.log('设置bgColorItem', bgColorItem);
+        // console.log('bgColor', bgColor);
+        // console.log('desktopAppearance11---', desktopAppearance);
         resetBg();
         bgColor.value = desktopAppearance.value.bgColor.map((item) => {
             // console.log('item', item);
@@ -54,7 +54,7 @@ export function useSetBg(desktopAppearance, setDesktopAppearance) {
     }
 
     const setBgImage = function (bgImageItem) {
-        console.log('设置bgImageItem', bgImageItem);
+        // console.log('设置bgImageItem', bgImageItem);
         resetBg();
         bgImage.value = desktopAppearance.value.bgImage.map((item) => {
             if (item.id === bgImageItem.id) {
@@ -72,8 +72,8 @@ export function useSetBg(desktopAppearance, setDesktopAppearance) {
 
 
     const setLocalBgImage = function (localBgImageItem) {
-        console.log('设置localBgImageItem', localBgImageItem);
-        console.log('localBgImage', desktopAppearance.value.localBgImage);
+        // console.log('设置localBgImageItem', localBgImageItem);
+        // console.log('localBgImage', desktopAppearance.value.localBgImage);
         // resetBg();
         // localBgImage.value = desktopAppearance.value.localBgImage.map((item) => {
         //     if (item.id === localBgImageItem.id) {

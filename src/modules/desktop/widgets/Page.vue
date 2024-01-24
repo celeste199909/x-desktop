@@ -16,17 +16,17 @@
       ghostClass="ghost"
       :forceFallback="true"
       draggable=".draggable"
-      v-model="pages[pageIndex]"
+      v-model="pagedIcons[pageIndex]"
       :style="gridStyle"
       @start="onStart"
       @end="onEnd"
       @move="onMove"
     >
-      <div v-for="item in pages[pageIndex]" :key="item.id" class="draggable">
+      <div v-for="item in pagedIcons[pageIndex]" :key="item.id" class="draggable">
         <Application
-          v-if="isPathActive(item)"
           :icon="item"
           :place="'on-desktop'"
+          :isOnQuickSearchMode="isOnQuickSearchMode"
         />
       </div>
     </VueDraggable>
@@ -34,17 +34,18 @@
 </template>
 
 <script setup>
-import { inject, computed,  ref, defineProps, defineEmits } from "vue";
+import { ref, defineProps, defineEmits } from "vue";
 import { VueDraggable } from "vue-draggable-plus";
 import Application from "@/modules/desktop/icons/Application.vue";
 import { getDesktopLayout } from "@/functions/desktop/desktopAppearance";
 import _ from "lodash";
-// 组合式函数
-import { useSetSortInfo } from "@/modules/desktop/composables/setSortInfo.js";
-const { setSortInfo } = useSetSortInfo();
 
 // props
 const props = defineProps({
+  pagedIcons: {
+    type: Array,
+    required: true,
+  },
   pageIndex: {
     type: Number,
     required: true,
@@ -61,26 +62,24 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  isOnQuickSearchMode: {
+    type: Boolean,
+    default: false,
+  },
+  moveToPage: {
+    type: Function,
+    required: true,
+  },
+  updateSortInfo: {
+    type: Function,
+    required: true,
+  },
 });
-// iconPaths: [{
-//             id:"desktop",
-//             name: "桌面",
-//             path: getUserDesktopPath(),
-//             active: true,
-//     }]
-const iconPaths = computed(() => props.desktopFunction.iconPaths);
-
-function isPathActive(icon) {
-  return _.find(iconPaths.value, { id: icon.fromPathId }).active;
-}
-
 // emit
 const emit = defineEmits(["setCurrentPage", "setIsDragging"]);
 
 // 注入 来自 App.vue
-const pages = inject("pages");
 const layout = ref(getDesktopLayout());
-const moveToPage = inject("moveToPage");
 
 // app容器 grid 布局
 const gridStyle = ref({
@@ -100,7 +99,7 @@ function onMove(event) {
     event.from.id !== event.to.id &&
     event.to.className.split(" ").includes("draggable-area")
   ) {
-    if (pages.value[toPageIndex].length >= layout.value.pageCapacity) {
+    if (props.pagedIcons[toPageIndex].length >= layout.value.pageCapacity) {
       console.log("页面已满");
       return false; // 拒绝添加到 area 中
     }
@@ -112,15 +111,15 @@ function onMove(event) {
   }
 
   if (event.to.id === "right-area") {
-    if (props.currentPage < pages.value.length - 1) {
-      moveToPage({ pageIndex: props.currentPage + 1, transition: true });
+    if (props.currentPage < props.pagedIcons.value.length - 1) {
+      props.moveToPage({ pageIndex: props.currentPage + 1, transition: true });
       return;
     }
     return false;
   }
   if (event.to.id === "left-area") {
     if (props.currentPage > 0) {
-      moveToPage({ pageIndex: props.currentPage - 1, transition: true });
+      props.moveToPage({ pageIndex: props.currentPage - 1, transition: true });
       return;
     }
     return false;
@@ -137,8 +136,9 @@ function onStart(event) {
 // 结束拖拽
 function onEnd(event) {
   emit("setIsDragging", false);
-  console.log("pages.value", pages.value);
-  setSortInfo();
+  console.log("pagedIcons.value", props.pagedIcons.value);
+  // setSortInfo();
+  props.updateSortInfo();
 }
 </script>
 <style scoped>

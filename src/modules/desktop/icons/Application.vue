@@ -45,17 +45,19 @@ const props = defineProps({
     required: true,
     default: "on-desktop",
   },
+  isOnQuickSearchMode: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const utools = inject("utools");
 const layout = ref(getDesktopLayout());
 const iconImage = ref();
 const position = { x: 0, y: 0 };
-const isOnQuickSearchMode = inject("isOnQuickSearchMode");
 
 // 处理打开图标
 function handleMouseDown(event) {
-  // iconImage.value.classList.add('scale-110');
   if (props.place === "in-contract-xfolder") return;
   console.log("Mouse Down Icon");
   position.x = event.clientX;

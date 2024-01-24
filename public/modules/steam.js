@@ -5,7 +5,7 @@ const { ipcRenderer, shell } = require("electron");
 const fs = require('fs');
 const path = require('path');
 
-console.log("加载 steam.js")
+// console.log("加载 steam.js")
 
 
 // 获取桌面图标信息

@@ -27,11 +27,11 @@ window.getDesktopIcons = function (callback) {
         callback(desktopIcons); // 在出错时返回空的 desktopIcons 数组
         return;
       }
-  
+
       files.forEach((file) => {
         // 或者快捷方式的真正路径
         const realPath = realpathSync(iconPath + "/" + file);
-  
+
         desktopIcons.push({
           rawName: file,
           iconImage: utools.getFileIcon(realPath),
@@ -39,7 +39,7 @@ window.getDesktopIcons = function (callback) {
           fromPath: iconPath,
           fromPathId: pathId
         });
-  
+
       });
       callback(desktopIcons); // 返回 desktopIcons 数组
     });

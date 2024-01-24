@@ -21,10 +21,13 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  setDesktopAppearance: {
+    type: Function,
+    required: true,
+  },
 });
 
 const bgOpacity = ref(props.desktopAppearance.bgOpacity);
-const setDesktopAppearance = inject("setDesktopAppearance");
 onMounted(() => {
   setBgOpacity();
 });
@@ -34,7 +37,7 @@ function onInput(event) {
 }
 
 function setBgOpacity() {
-  setDesktopAppearance({
+  props.setDesktopAppearance({
     ...props.desktopAppearance,
     bgOpacity: bgOpacity.value,
   });

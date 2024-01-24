@@ -112,10 +112,10 @@ const getDesktopAppearance = function () {
 //  * @description: 重置本地外观数据
 //  * @return {DesktopAppearance}
 //  */
-// const resetDesktopAppearance = function () {
-//     utools.dbStorage.setItem("desktopAppearance", defaultDesktopAppearance);
-//     return defaultDesktopAppearance;
-// }
+const resetDesktopAppearance = function () {
+    utools.dbStorage.setItem("desktopAppearance", defaultDesktopAppearance);
+    return defaultDesktopAppearance;
+}
 
 // 桌面布局
 /**
@@ -167,24 +167,8 @@ const getDesktopLayout = function () {
     return layout;
 }
 
-/**
- * @description: 获取本地桌面数据
- * @return {Array} [ ["iconRawName", ...] , ["iconRawName", ...] ]
- */
-const getDesktopSortInfo = function () {
-    const localSortInfo = utools.dbStorage.getItem("desktopSortInfo");
-    if (!localSortInfo) {
-        utools.dbStorage.setItem("desktopSortInfo", []);
-        return [];
-    } else {
-        console.log("desktopSortInfo", localSortInfo);
-        return localSortInfo;
-    }
-}
-
 export {
     defaultDesktopAppearance,
-    getDesktopSortInfo,
     getDesktopAppearance,
     resetDesktopAppearance,
     getDesktopLayout,

@@ -8,14 +8,9 @@
 </template>
 
 <script setup>
-import { inject } from "vue";
-import { defaultDesktopAppearance } from "@/functions/desktop/desktopAppearance";
-
-const setDesktopAppearance = inject("setDesktopAppearance");
 
 function resetDesktopAppearance() {
-  setDesktopAppearance(defaultDesktopAppearance);
-  console.log("重置外观设置（缺少应用设置）");
+  console.log("重置外观设置");
 }
 </script>
 <style scoped></style>
