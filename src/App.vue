@@ -1,11 +1,7 @@
 <template>
   <!-- desktop -->
   <KeepAlive>
-    <Desktop
-      v-if="currentModule === 'desktop'"
-      :desktopIcons="desktopIcons"
-      :initDesktop="initDesktop"
-    />
+    <Desktop v-if="currentModule === 'desktop'" />
     <!-- steam -->
     <Steam v-else-if="currentModule === 'steam'" :steamApps="steamApps" />
     <!-- 浏览器 -->
@@ -34,24 +30,15 @@ import _ from "lodash";
 const currentModule = ref("desktop"); // 模块切换
 provide("currentModule", currentModule); // 模块切换
 // 桌面模块
-const desktopIcons = ref([]); // 桌面图标
+// const desktopIcons = ref([]); // 桌面图标
 // steam 模块
 const steamApps = ref([]); // steam 应用
 
 // 获取桌面图标，分页
 onBeforeMount(() => {
-  initDesktop();
   initSteam();
   initBrowser();
 });
-
-// 获取原始图标数据
-function initDesktop() {
-  window.getDesktopIcons(function (rawIcons) {
-    desktopIcons.value = handleRawIcons(rawIcons); // 处理图标
-    // console.log("初始化 desktopIcons", desktopIcons.value);
-  });
-}
 
 // 获取 steam 应用数据
 function initSteam() {

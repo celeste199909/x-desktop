@@ -46,31 +46,27 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
-import { onMounted, defineProps, inject } from "vue";
+import { onMounted, defineProps, inject,ref  } from "vue";
 import showToast from "@/components/toast/index";
+import { getDesktopAppearance } from "@/functions/desktop/desktopAppearance";
 
 const props = defineProps({
-  desktopAppearance: {
-    type: Object,
-    required: true,
-  },
   setDesktopAppearance: {
     type: Function,
     required: true,
   },
 });
-
-const bgImage = computed(() => props.desktopAppearance.bgImage);
-const localBgImage = computed(() => props.desktopAppearance.localBgImage);
+const bgColor = ref(getDesktopAppearance().bgColor);
+const bgImage = ref(getDesktopAppearance().bgImage);
+const localBgImage = ref(getDesktopAppearance().localBgImage);
 
 const utools = inject("utools");
 
 onMounted(() => {
-  updateBgImage();
+  applyBgImage();
 });
 
-function updateBgImage() {
+function applyBgImage() {
   bgImage.value.forEach((item) => {
     if (item.current) {
       setBgImage(item.name);
@@ -85,95 +81,82 @@ function updateBgImage() {
 
 // 设置背景
 function setBgImage(name) {
-  const newDesktopAppearance = {
-    ...props.desktopAppearance,
-    bgImage: bgImage.value.map((item) => {
-      if (item.name === name) {
-        item.current = true;
-        document.body.style.backgroundImage = `url(${getAssetsFile(name)})`;
-        // 居中
-        document.body.style.backgroundPosition = "center";
-        document.body.style.backgroundSize = "cover";
-        document.body.style.backgroundRepeat = "no-repeat";
-      } else {
-        item.current = false;
-      }
-      return item;
-    }),
-    localBgImage: props.desktopAppearance.localBgImage.map((item) => {
-      item.current = false;
-      return item;
-    }),
-    bgColor: props.desktopAppearance.bgColor.map((item) => {
-      item.current = false;
-      return item;
-    }),
-  };
-  props.setDesktopAppearance(newDesktopAppearance);
+  resetBg();
+  bgImage.value.forEach((item) => {
+    if (item.name === name) {
+      item.current = true;
+      document.body.style.backgroundImage = `url(${getAssetsFile(name)})`;
+      document.body.style.backgroundPosition = "center";
+      document.body.style.backgroundSize = "cover";
+      document.body.style.backgroundRepeat = "no-repeat";
+    }
+  });
+  props.setDesktopAppearance({
+    bgColor: bgColor.value,
+    bgImage: bgImage.value,
+    localBgImage: localBgImage.value,
+  });
 }
 
 // 设置本地背景
 function setLocalBgImage(path) {
-  const newDesktopAppearance = {
-    ...props.desktopAppearance,
-    localBgImage: localBgImage.value.map((item) => {
-      if (item.path === path) {
-        item.current = true;
-        document.body.style.backgroundImage = `url(${getLocalImage(path)})`;
-        // 居中
-        document.body.style.backgroundPosition = "center";
-        document.body.style.backgroundSize = "cover";
-        document.body.style.backgroundRepeat = "no-repeat";
-      } else {
-        item.current = false;
-      }
-      return item;
-    }),
-    bgImage: props.desktopAppearance.bgImage.map((item) => {
-      item.current = false;
-      return item;
-    }),
-    bgColor: props.desktopAppearance.bgColor.map((item) => {
-      item.current = false;
-      return item;
-    }),
-  };
-  props.setDesktopAppearance(newDesktopAppearance);
+  resetBg();
+  localBgImage.value.forEach((item) => {
+    if (item.path === path) {
+      item.current = true;
+      document.body.style.backgroundImage = `url(${getLocalImage(path)})`;
+      document.body.style.backgroundPosition = "center";
+      document.body.style.backgroundSize = "cover";
+      document.body.style.backgroundRepeat = "no-repeat";
+    }
+  });
+  props.setDesktopAppearance({
+    bgColor: bgColor.value,
+    bgImage: bgImage.value,
+    localBgImage: localBgImage.value,
+  });
+}
+
+function resetBg() {
+  bgColor.value.forEach((item) => {
+    item.current = false;
+  });
+  bgImage.value.forEach((item) => {
+    item.current = false;
+  });
+  localBgImage.value.forEach((item) => {
+    item.current = false;
+  });
 }
 
 // 上传图片背景
 function handleUploadImage() {
-  const newLocalBgImage = [...localBgImage.value];
   // 选择图片
   const filePathList = utools.showOpenDialog({
     title: "选择图片",
     properties: ["openFile"],
     filters: [{ name: "Images", extensions: ["jpg", "png", "gif"] }],
   });
-  console.log(filePathList);
+  console.log('%c [ 选择图片 ]-137', 'font-size:13px; background:pink; color:#bf2c9f;', filePathList)
   // 如果没有选择图片，返回
   if (!filePathList) return;
   // 如果选择的图片已经存在，返回
-  if (newLocalBgImage.some((item) => item.path === filePathList[0])) {
+  if (localBgImage.value.some((item) => item.path === filePathList[0])) {
     showToast("图片已存在");
     return;
   }
   // 添加到本地背景
-  newLocalBgImage.unshift({
+  localBgImage.value.unshift({
     current: false,
     path: filePathList[0],
   });
   // 如果本地背景数量超过4个，删除最后一个
-  if (newLocalBgImage.length > 6) {
-    newLocalBgImage.pop();
+  if (localBgImage.value.length > 6) {
+    localBgImage.value.pop();
   }
-
-  const newDesktopAppearance = {
-    ...props.desktopAppearance,
-    localBgImage: newLocalBgImage,
-  };
-
-  props.setDesktopAppearance(newDesktopAppearance);
+  props.setDesktopAppearance({
+    localBgImage: localBgImage.value,
+  });
 }
 
 const getLocalImage = (path) => {

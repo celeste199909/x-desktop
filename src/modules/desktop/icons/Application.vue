@@ -59,7 +59,6 @@ const position = { x: 0, y: 0 };
 // 处理打开图标
 function handleMouseDown(event) {
   if (props.place === "in-contract-xfolder") return;
-  console.log("Mouse Down Icon");
   position.x = event.clientX;
   position.y = event.clientY;
 }
@@ -67,7 +66,6 @@ function handleMouseDown(event) {
 function handleMouseUp(icon, event) {
   // iconImage.value.classList.remove('scale-110');
   if (props.place === "in-contract-xfolder") return;
-  console.log("Mouse Up Icon");
   const x = event.clientX;
   const y = event.clientY;
   if (Math.abs(x - position.x) < 1 && Math.abs(y - position.y) < 1) {

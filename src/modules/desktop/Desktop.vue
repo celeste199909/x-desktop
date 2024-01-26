@@ -13,7 +13,6 @@
           @setCurrentPage="setCurrentPage"
           :isDragging="isDragging"
           @setIsDragging="setIsDragging"
-          :desktopFunction="desktopFunction"
           :isOnQuickSearchMode="isOnQuickSearchMode"
           :moveToPage="moveToPage"
           :updateSortInfo="updateSortInfo"
@@ -23,11 +22,12 @@
     <!-- 侧边栏-->
     <Sidebar
       :isShowSidebar="isShowSidebar"
-      :desktopAppearance="desktopAppearance"
       :setDesktopAppearance="setDesktopAppearance"
-      :desktopFunction="desktopFunction"
       :setDesktopFunction="setDesktopFunction"
-      :initDesktop="initDesktop"
+      :addPath="addPath"
+      :removePath="removePath"
+      :activePath="activePath"
+      :inactivePath="inactivePath"
     />
     <!-- 右键菜单 -->
     <ContextMenu
@@ -58,15 +58,7 @@
 </template>
 
 <script setup>
-import {
-  inject,
-  onMounted,
-  ref,
-  provide,
-  defineProps,
-  computed,
-  defineEmits,
-} from "vue";
+import { inject, ref, onBeforeMount } from "vue";
 // 组件
 import Page from "@/modules/desktop/widgets/Page.vue";
 import PageIndicator from "@/modules/desktop/widgets/PageIndicator.vue";
@@ -79,68 +71,205 @@ import { useWheelToPage } from "@/modules/desktop/composables/wheelToPage.js";
 import { useMoveToPage } from "@/modules/desktop/composables/moveToPage.js";
 import { watchDeep } from "@vueuse/core";
 // 参数：pagedIcons, setDesktopSortInfo
-import {  useUpdateSortInfo } from "@/modules/desktop/composables/updateSortInfo.js";
+import { useUpdateSortInfo } from "@/modules/desktop/composables/updateSortInfo.js";
 // 工具
-import { getDesktopAppearance } from "@/functions/desktop/desktopAppearance";
+import {
+  getDesktopAppearance,
+  getDesktopLayout,
+} from "@/functions/desktop/desktopAppearance";
 import { getDesktopFunction } from "@/functions/desktop/desktopFunction";
 import { getDesktopSortInfo } from "@/functions/desktop/desktopSortInfo";
-// 分页
-import { paginateArray } from "@/functions/desktop/paginateArray";
 // 更新排序
-
-
-const props = defineProps({
-  // 处理过, 未经分页的图标
-  desktopIcons: {
-    type: Array,
-    required: true,
-  },
-  // 重新加载图标
-  initDesktop: {
-    type: Function,
-    required: true,
-  },
-});
+import { handleRawIcons } from "@/functions/desktop/handleRawIcons";
+// showToast
+import showToast from "@/components/toast/index";
 
 // 来自 App.vue
 const currentModule = inject("currentModule");
+const icons = ref({});
+const pagedIcons = ref([]);
 
-// 未经分页的图标，包括所有路径（不论是否启用）下的图标, 
-// const wholeDesktopIcons = computed(()=> props.desktopIcons);  
-const pagedIcons = ref([]); // 分页后的图标
-const computedPageIcons = computed(() => paginateArray(props.desktopIcons));
-watchDeep(computedPageIcons, (newVal) => {
-  pagedIcons.value = computedPageIcons.value;
-  // 分页完成时更新排序信息
-  updateSortInfo();
+onBeforeMount(() => {
+  init();
 });
+
+async function init() {
+  const allIcons = await loadAllIcons();
+  icons.value = allIcons;
+  console.log(
+    "%c [ 初始化 所有图标 ]-93",
+    "font-size:13px;  background:green; color:white;",
+    icons.value
+  );
+  const paged = paginateIcons(allIcons);
+  pagedIcons.value = paged;
+  console.log(
+    "%c [ 初始化 分页图标 ]-113",
+    "font-size:13px; background:green; color:white;",
+    pagedIcons.value
+  );
+}
+
+// 所有路径的图标
+// 分页用于展示的图标
+function paginateIcons(icons) {
+  // 获取本地 iconPaths
+  const iconPaths = getDesktopFunction().iconPaths;
+  // 获取页面容量
+  const pageSize = getDesktopLayout().pageSize;
+  let _icons = { ...icons };
+  let _pages = [];
+  let _page = [];
+  iconPaths.forEach((path) => {
+    const pathId = path.id;
+    const _pageIcons = [..._icons[pathId]];
+    // 如果路径未激活，则跳过
+    if (!path.active) return;
+    for (let i = 0; i < _pageIcons.length; i++) {
+      if (_page.length < pageSize) {
+        _page.push(_pageIcons[i]);
+      } else {
+        _pages.push(_page);
+        _page = [];
+        _page.push(_pageIcons[i]);
+      }
+    }
+  });
+  _pages.push(_page);
+  return _pages;
+}
+
+async function loadAllIcons() {
+  return new Promise(async (resolve, reject) => {
+    const icons = {};
+    const iconPaths = getDesktopFunction().iconPaths;
+    for (let i = 0; i < iconPaths.length; i++) {
+      const path = iconPaths[i];
+      const handledIcons = await loadIcons(path);
+      icons[path.id] = handledIcons;
+    }
+    resolve(icons);
+  });
+}
+
+async function loadIcons(path) {
+  const rawIcons = await window.getIconsByPath(path);
+  const handledIcons = handleRawIcons(rawIcons);
+  return handledIcons;
+}
+
+// 添加路径
+async function addPath(path) {
+  // 将该路径下的图标添加到 icons 中
+  const handledIcons = await loadIcons(path);
+  icons.value[path.id] = handledIcons;
+  console.log(
+    "%c [ 添加新路径 ]-157",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    icons.value
+  );
+}
+
+// 删除路径
+function removePath(path) {
+  // 如果只有一页，则不删除
+  if (pagedIcons.value.length === 1) {
+    showToast("至少保留一个路径");
+    return;
+  }
+  // 将该路径下的图标从 icons 中删除
+  delete icons.value[path.id];
+  console.log(
+    "%c [ 删除路径 ]-163",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    icons.value
+  );
+}
+
+// 启用路径
+async function activePath(path) {
+  // 将该路径下的图标添加到 pagedicons中
+  const handledIcons = await loadIcons(path);
+  const pageSize = getDesktopLayout().pageSize;
+  const _handledIcons = [...handledIcons];
+  _handledIcons.forEach((icon) => {
+    let currentPage = pagedIcons.value.length - 1;
+    if (pagedIcons.value[currentPage].length < pageSize) {
+      pagedIcons.value[currentPage].push(icon);
+    } else {
+      pagedIcons.value.push([]);
+      currentPage++;
+      pagedIcons.value[currentPage].push(icon);
+      moveToPage({ pageIndex: currentPage });
+    }
+  });
+
+  console.log(
+    "%c [ 启用路径 ]-157",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    pagedIcons.value
+  );
+}
+
+// 不启用路径
+function inactivePath(path) {
+
+  const remveId = path.id;
+  // 将该路径下的图标从 pagedicons中删除
+  const newpagedIcons = pagedIcons.value.map((page) => {
+    return page.filter((icon) => {
+      return icon.fromPathId !== remveId;
+    });
+  });
+  pagedIcons.value = newpagedIcons;
+  // 如果有空页面，则删除
+  pagedIcons.value = pagedIcons.value.filter((page) => {
+    return page.length > 0;
+  });
+  // 如果当前页是最后一页，则切换至前一页
+  if (currentPage.value === pagedIcons.value.length) {
+    moveToPage({ pageIndex: currentPage.value - 1, transition: true });
+  }
+  console.log(
+    "%c [ 不启用路径 ]-157",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    pagedIcons.value
+  );
+}
 
 // 桌面外观
-const desktopAppearance = ref(getDesktopAppearance());
-function setDesktopAppearance(newVal) {
-  desktopAppearance.value = newVal;
-}
-watchDeep(desktopAppearance, (newVal) => {
+function setDesktopAppearance(updateObj) {
+  const newDesktopAppearance = {
+    ...getDesktopAppearance(),
+    ...updateObj,
+  };
   utools.dbStorage.setItem(
     "desktopAppearance",
-    JSON.parse(JSON.stringify(newVal))
+    JSON.parse(JSON.stringify(newDesktopAppearance))
   );
-});
+  console.log(
+    "%c [ 桌面外观设置更新, 已保存至本地 ]-166",
+    "font-size:13px; background:blue; color:white;",
+    getDesktopAppearance()
+  );
+}
 
 // 桌面功能
-const desktopFunction = ref(getDesktopFunction());
-watchDeep(desktopFunction, (newVal) => {
+function setDesktopFunction(updateObj) {
+  const newDesktopFunction = {
+    ...getDesktopFunction(),
+    ...updateObj,
+  };
   utools.dbStorage.setItem(
     "desktopFunction",
-    JSON.parse(JSON.stringify(newVal))
+    JSON.parse(JSON.stringify(newDesktopFunction))
   );
-});
-function setDesktopFunction(newVal) {
-  desktopFunction.value = newVal;
+  console.log(
+    "%c [ 桌面功能设置更新, 已保存至本地 ]-173",
+    "font-size:13px; background:blue; color:white;",
+    getDesktopFunction()
+  );
 }
-watchDeep(desktopFunction.value.iconPaths, (newVal) => {
-  props.initDesktop();
-});
 
 // 桌面排序信息
 const desktopSortInfo = ref(getDesktopSortInfo());
@@ -176,8 +305,6 @@ const isShowSidebar = ref(false); // 侧边栏 emit: showSidebar
 function showSidebar(value) {
   isShowSidebar.value = value;
 }
-
-
 
 // 是否处于拖拽状态
 const isDragging = ref(false); // 用于控制拖拽时的样式（背景） emit: setIsDragging

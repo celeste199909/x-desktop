@@ -58,10 +58,6 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-  desktopFunction: {
-    type: Object,
-    required: true,
-  },
   isOnQuickSearchMode: {
     type: Boolean,
     default: false,
@@ -99,8 +95,7 @@ function onMove(event) {
     event.from.id !== event.to.id &&
     event.to.className.split(" ").includes("draggable-area")
   ) {
-    if (props.pagedIcons[toPageIndex].length >= layout.value.pageCapacity) {
-      console.log("页面已满");
+    if (props.pagedIcons[toPageIndex].length >= layout.value.pageSize) {
       return false; // 拒绝添加到 area 中
     }
   }
@@ -127,8 +122,6 @@ function onMove(event) {
 }
 // 开始拖拽
 function onStart(event) {
-  console.log("onStart", event);
-  console.log(event.item.className.split(" "));
   if (event.item.className.split(" ").includes("draggable")) {
     emit("setIsDragging", true);
   }
@@ -136,8 +129,6 @@ function onStart(event) {
 // 结束拖拽
 function onEnd(event) {
   emit("setIsDragging", false);
-  console.log("pagedIcons.value", props.pagedIcons.value);
-  // setSortInfo();
   props.updateSortInfo();
 }
 </script>

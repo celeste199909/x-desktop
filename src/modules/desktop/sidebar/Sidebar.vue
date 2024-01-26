@@ -28,7 +28,6 @@
         <template v-for="(com, index) in content[0]" :key="index">
           <component
             :is="com"
-            :desktopAppearance="desktopAppearance"
             :setDesktopAppearance="setDesktopAppearance"
           ></component>
         </template>
@@ -41,9 +40,11 @@
         <template v-for="(com, index) in content[1]" :key="index">
           <component
             :is="com"
-            :desktopFunction="desktopFunction"
             :setDesktopFunction="setDesktopFunction"
-            :initDesktop="initDesktop"
+            :addPath="addPath"
+            :removePath="removePath"
+            :activePath="activePath"
+            :inactivePath="inactivePath"
           ></component>
         </template>
       </div>
@@ -61,7 +62,7 @@
 </template>
 
 <script setup>
-import { inject, ref, defineProps, defineEmits } from "vue";
+import { ref, defineProps } from "vue";
 // 外观
 import Theme from "./appearance/Theme.vue";
 import BgColor from "./appearance/BgColor.vue";
@@ -74,29 +75,32 @@ import SetPath from "./function/SetPath.vue";
 // 帮助
 import Help from "./help/Help.vue";
 
-const utools = inject("utools");
 const props = defineProps({
   isShowSidebar: {
     type: Boolean,
     default: false,
   },
-  desktopAppearance: {
-    type: Object,
-    default: () => ({}),
-  },
   setDesktopAppearance: {
     type: Function,
     default: () => {},
-  },
-  desktopFunction: {
-    type: Object,
-    default: () => ({}),
   },
   setDesktopFunction: {
     type: Function,
     default: () => {},
   },
-  initDesktop: {
+  addPath: {
+    type: Function,
+    default: () => {},
+  },
+  removePath: {
+    type: Function,
+    default: () => {},
+  },
+  activePath: {
+    type: Function,
+    default: () => {},
+  },
+  inactivePath: {
     type: Function,
     default: () => {},
   },

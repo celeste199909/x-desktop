@@ -27,7 +27,8 @@ export function handleRawIcons(rawIcons) {
       suffix:  rawIcon.rawName.split(".").pop(),
       searchKeywords: getSearchKeywords(showName),
       fromPath: rawIcon.fromPath,
-      fromPathId: rawIcon.fromPathId
+      fromPathId: rawIcon.fromPathId,
+      fromPathName: rawIcon.fromPathName
     };
     handledIcons.push(icon);
   });

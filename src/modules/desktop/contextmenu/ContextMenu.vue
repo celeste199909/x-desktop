@@ -68,7 +68,6 @@ const { globalContextMenuOptions } = useGlobalContextMenu(); // 全局右键菜�
 
 const clickTargetType = computed(() => {
   if (!clickTarget.value) return null;
-  console.log("desktop clickTargetType", clickTarget.className);
   const classList = clickTarget.value.className.split(" ");
   if (
     classList.includes("xfolder-icons") ||
@@ -99,11 +98,6 @@ const menuOptions = ref([
     handler: openApp,
   },
   {
-    name: "隐藏图标",
-    enabled: ["icon"],
-    handler: () => {},
-  },
-  {
     name: "新建页面",
     enabled: ["desktop", "other"],
     handler: newPage,
@@ -112,11 +106,6 @@ const menuOptions = ref([
     name: "删除页面",
     enabled: ["desktop", "other"],
     handler: removePage,
-  },
-  {
-    name: "查看隐藏图标",
-    enabled: ["desktop", "other"],
-    handler: () => {},
   },
   {
     name: "桌面设置",
@@ -193,7 +182,7 @@ function openDesktopSetting(event) {
 // // 点击新建文件夹
 // function handleClickNewFolder() {
 //   // 如果页面容量已满，提示不能再添加
-//   if (props.pagedIcons[currentPage.value].length >= layout.value.pageCapacity) {
+//   if (props.pagedIcons[currentPage.value].length >= layout.value.pageSize) {
 //     console.log("页面容量已满，不能再添加文件夹");
 //     return;
 //   }

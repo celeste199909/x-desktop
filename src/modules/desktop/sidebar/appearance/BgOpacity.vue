@@ -13,21 +13,18 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { onMounted, defineProps, inject } from "vue";
+import { onMounted, defineProps, ref  } from "vue";
+import { getDesktopAppearance } from "@/functions/desktop/desktopAppearance";
 
 const props = defineProps({
-  desktopAppearance: {
-    type: Object,
-    required: true,
-  },
   setDesktopAppearance: {
     type: Function,
     required: true,
   },
 });
 
-const bgOpacity = ref(props.desktopAppearance.bgOpacity);
+const bgOpacity = ref(getDesktopAppearance().bgOpacity);
+
 onMounted(() => {
   setBgOpacity();
 });
@@ -38,7 +35,6 @@ function onInput(event) {
 
 function setBgOpacity() {
   props.setDesktopAppearance({
-    ...props.desktopAppearance,
     bgOpacity: bgOpacity.value,
   });
   document

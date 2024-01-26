@@ -28,27 +28,25 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
-import { onMounted, defineProps, inject } from "vue";
+import { onMounted, defineProps, ref  } from "vue";
+import { getDesktopAppearance } from "@/functions/desktop/desktopAppearance";
 
 const props = defineProps({
-  desktopAppearance: {
-    type: Object,
-    required: true,
-  },
   setDesktopAppearance: {
     type: Function,
     required: true,
   },
 });
 
-const bgColor = computed(() => props.desktopAppearance.bgColor);
+const bgColor = ref(getDesktopAppearance().bgColor);
+const bgImage = ref(getDesktopAppearance().bgImage);
+const localBgImage = ref(getDesktopAppearance().localBgImage);
 
 onMounted(() => {
-  updateBgColor();
+  applyBgColor();
 });
 
-function updateBgColor() {
+function applyBgColor() {
   bgColor.value.forEach((item) => {
     if (item.current) {
       setBgColor(item);
@@ -57,34 +55,36 @@ function updateBgColor() {
 }
 
 // 设置背景颜色
-function setBgColor(item) {
-  const newDesktopAppearance = {
-    ...props.desktopAppearance,
-    bgColor: props.desktopAppearance.bgColor.map((x) => {
-      if (x.color === item.color) {
-        x.current = true;
-        return x;
-      } else {
-        x.current = false;
-        return x;
-      }
-    }),
-    bgImage: props.desktopAppearance.bgImage.map((x) => {
-      x.current = false;
-      return x;
-    }),
-    localBgImage: props.desktopAppearance.localBgImage.map((x) => {
-      x.current = false;
-      return x;
-    }),
-  };
-  props.setDesktopAppearance(newDesktopAppearance);
+function setBgColor(colorObj) {
+  resetBg();
+  bgColor.value.forEach((item) => {
+    if (item.color === colorObj.color) {
+      item.current = true;
+    }
+  });
+  props.setDesktopAppearance({
+    bgColor: bgColor.value,
+    bgImage: bgImage.value,
+    localBgImage: localBgImage.value,
+  });
   // 设置背景色
-  if (Array.isArray(item.color)) {
-    document.body.style.background = `linear-gradient(${item.direction}, ${item.color[0]}, ${item.color[1]})`;
+  if (Array.isArray(colorObj.color)) {
+    document.body.style.background = `linear-gradient(${colorObj.direction}, ${colorObj.color[0]}, ${colorObj.color[1]})`;
   } else {
-    document.body.style.background = item.color;
+    document.body.style.background = colorObj.color;
   }
+}
+
+function resetBg() {
+  bgColor.value.forEach((item) => {
+    item.current = false;
+  });
+  bgImage.value.forEach((item) => {
+    item.current = false;
+  });
+  localBgImage.value.forEach((item) => {
+    item.current = false;
+  });
 }
 </script>
 <style scoped></style>

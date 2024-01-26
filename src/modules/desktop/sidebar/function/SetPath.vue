@@ -6,12 +6,13 @@
         添加
       </div>
     </div>
-    <div class="mt-1 mb-4 text-[13px]">启用的路径包含的图标会显示在桌面上</div>
+    <div class="mt-1 mb-4 text-[13px]">启用的路径所含图标会显示在桌面上</div>
     <!-- 路径卡片 -->
     <VueDraggable
       v-model="iconPaths"
       ghostClass="ghost"
       class="flex flex-col justify-start items-center gap-y-4"
+      @end="setDesktopFunction({ iconPaths: iconPaths })"
     >
       <div
         v-for="item in iconPaths"
@@ -38,14 +39,14 @@
         <div class="flex w-16 flex-col justify-center items-center gap-y-1">
           <div
             class="text-blue-500 hover:font-bold hover:underline cursor-pointer"
-            @click="toggleActive(item.id)"
+            @click="toggleActive(item)"
           >
             {{ item.active ? "不启用" : "启用" }}
           </div>
           <div
             v-if="item.id !== 'desktop'"
             class="w-8 h-8 flex justify-center items-center text-red-400 hover:text-red-500 hover:font-bold cursor-pointer"
-            @click="removePath(item.id)"
+            @click="handleRemovePath(item)"
           >
             删除
           </div>
@@ -63,38 +64,39 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
-import { onMounted, defineProps, inject } from "vue";
+import { ref } from "vue";
+import { defineProps } from "vue";
 import _ from "lodash";
 import showToast from "@/components/toast/index";
 import { nanoid } from "nanoid";
 import { VueDraggable } from "vue-draggable-plus";
-import { watchDeep } from "@vueuse/core";
+import { getDesktopFunction } from "@/functions/desktop/desktopFunction";
 
 const props = defineProps({
-  desktopFunction: {
-    type: Object,
-    required: true,
-  },
   setDesktopFunction: {
     type: Function,
     required: true,
   },
-  initDesktop: {
+  addPath: {
+    type: Function,
+    required: true,
+  },
+  removePath: {
+    type: Function,
+    required: true,
+  },
+  activePath: {
+    type: Function,
+    required: true,
+  },
+  inactivePath: {
     type: Function,
     required: true,
   },
 });
 
 // iconPaths: [{ name: "桌面", path: getUserDesktopPath(), active: true,} ...]
-const iconPaths = ref(props.desktopFunction.iconPaths);
-
-watchDeep(iconPaths, (newVal) => {
-  props.setDesktopFunction({
-    ...props.desktopFunction,
-    iconPaths: newVal,
-  });
-});
+const iconPaths = ref(getDesktopFunction().iconPaths);
 
 // 添加路径
 function handleAddPath() {
@@ -113,23 +115,53 @@ function handleAddPath() {
     return;
   }
 
-  iconPaths.value.push({
+  const p = {
     id: nanoid(),
     name: _.last(newPath.split("\\")),
     path: newPath,
     active: false,
-  });
-}
+    sortInfo: [],
+  };
 
+  iconPaths.value.push(p);
+
+  props.setDesktopFunction({ iconPaths: iconPaths.value }); // 保存path数据到本地
+  props.addPath(p); // 添加路径下的图标到全部icon中
+}
 // 删除路径
-function removePath(id) {
-  _.remove(iconPaths.value, { id });
+function handleRemovePath(path) {
+  // 先将激活的路径设置为false
+  toggleActive(path)
+  // 再删除路径
+  _.remove(iconPaths.value, { id: path.id });
+  props.setDesktopFunction({ iconPaths: iconPaths.value });
+  props.removePath(path);
 }
 
 // 切换启用状态
-function toggleActive(id) {
-  const index = _.findIndex(iconPaths.value, { id });
-  iconPaths.value[index].active = !iconPaths.value[index].active;
+function toggleActive(path) {
+  // console.log('%c [ 切换路径的启用状态 ]-121', 'font-size:13px; background:yellow; color:green;', id)
+  const isActive = path.active;
+  const index = _.findIndex(iconPaths.value, { id: path.id });
+
+  console.log('%c [ isActive ]-144', 'font-size:13px; background:pink; color:#bf2c9f;', isActive)
+  if (isActive) {
+    // iconPaths 当前是否只有一个激活的路径
+    const activeItems = iconPaths.value.filter((item) => item.active);
+    console.log('[ activeItems ] >', activeItems)
+    const hasOnlyOneActive = activeItems.length === 1;
+    if (hasOnlyOneActive) {
+      showToast("至少保留一个启用的路径");
+      return;
+    }
+    iconPaths.value[index].active = false;
+    props.setDesktopFunction({ iconPaths: iconPaths.value });
+    props.inactivePath(path);
+  } else {
+    iconPaths.value[index].active = true;
+    props.setDesktopFunction({ iconPaths: iconPaths.value });
+    props.activePath(path);
+  }
 }
 
 // 打开文件夹

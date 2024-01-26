@@ -103,7 +103,7 @@ const getDesktopAppearance = function () {
         utools.dbStorage.setItem("desktopAppearance", defaultDesktopAppearance);
         return defaultDesktopAppearance;
     } else {
-        console.log("desktopAppearance", desktopAppearance);
+        // console.log("desktopAppearance", desktopAppearance);
         return desktopAppearance;
     }
 }
@@ -132,7 +132,7 @@ const resetDesktopAppearance = function () {
  * @property {Number} gapY 纵向间隔
  * @property {Number} row 行数
  * @property {Number} column 列数
- * @property {Number} pageCapacity 页面容量
+ * @property {Number} pageSize 页面容量
  */
 const getDesktopLayout = function () {
     let layout = {
@@ -147,7 +147,7 @@ const getDesktopLayout = function () {
         gapY: 12,
         row: 0,
         column: 0,
-        pageCapacity: 0,
+        pageSize: 0,
     };
 
     layout.column = Math.floor(
@@ -162,8 +162,7 @@ const getDesktopLayout = function () {
     layout.minWidth = layout.column * (layout.cellLength + layout.gapX);
     layout.minHeight = layout.row * (layout.cellLength + layout.gapY);
 
-    layout.pageCapacity = layout.column * layout.row;
-
+    layout.pageSize = layout.column * layout.row;
     return layout;
 }
 

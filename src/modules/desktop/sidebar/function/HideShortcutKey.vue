@@ -27,26 +27,22 @@
 import { computed, ref } from "vue";
 import { onMounted, defineProps, inject } from "vue";
 import _ from "lodash";
+import { getDesktopFunction } from "@/functions/desktop/desktopFunction";
 
 const props = defineProps({
-  desktopFunction: {
-    type: Object,
-    required: true,
-  },
   setDesktopFunction: {
     type: Function,
     required: true,
   },
 });
 
-const hideShotcutKey = computed(() => props.desktopFunction.hideShotcutKey);
+const hideShotcutKey = ref(getDesktopFunction().hideShotcutKey);
 
 // 设置快捷键
 function handleFocus(event) {
   event.target.addEventListener("keydown", (event) => {
     event.preventDefault();
     event.stopPropagation();
-    const newHideShotcutKey = [...hideShotcutKey.value];
     if (
       event.key === "Backspace" ||
       event.key === "Delete" ||
@@ -55,24 +51,17 @@ function handleFocus(event) {
       event.keyCode === 46 ||
       event.keyCode === 32
     ) {
-      newHideShotcutKey[1] = "";
-      props.setDesktopFunction({
-        ...props.desktopFunction,
-        hideShotcutKey: newHideShotcutKey,
-      });
+      hideShotcutKey.value[1] = "";
+      props.setDesktopFunction({ hideShotcutKey: hideShotcutKey.value });
       return;
     }
     if (event.target.id === "input1") {
-      newHideShotcutKey[0] = _.capitalize(event.key);
+      hideShotcutKey.value[0] = _.capitalize(event.key);
     }
     if (event.target.id === "input2") {
-      newHideShotcutKey[1] = _.capitalize(event.key);
+      hideShotcutKey.value[1] = _.capitalize(event.key);
     }
-    // event.target.value = _.capitalize(event.key);
-    props.setDesktopFunction({
-      ...props.desktopFunction,
-      hideShotcutKey: newHideShotcutKey,
-    });
+    props.setDesktopFunction({ hideShotcutKey: hideShotcutKey.value });
   });
 }
 
@@ -95,7 +84,6 @@ function handleKeydown(event) {
     !hideShotcutKey.value[1] &&
     keydownedList.value[0] === hideShotcutKey.value[0]
   ) {
-    console.log(`一个快捷键，按下了 ${hideShotcutKey.value[0]} 键`);
     window.hideDesk();
     // 在这里执行你想要的操作
     return;
@@ -112,9 +100,6 @@ function handleKeydown(event) {
     keydownedList.value[0] === hideShotcutKey.value[0] &&
     keydownedList.value[1] === hideShotcutKey.value[1]
   ) {
-    console.log(
-      `两个快捷键,按下了 ${keydownedList.value[0]} , ${keydownedList.value[1]} 键`
-    );
     window.hideDesk();
     return;
   }

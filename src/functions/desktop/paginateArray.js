@@ -30,7 +30,7 @@ const paginateArray = function (desktopIcons) {
     const sortInfo = getDesktopSortInfo();
     const allPathsSortInfo = sortInfo.allPathsSortInfo;
     const pagedIconsSortInfo = sortInfo.pagedIconsSortInfo;
-    const pageSize = getDesktopLayout().pageCapacity;
+    const pageSize = getDesktopLayout().pageSize;
 
 
     // console.log("开始分页排序,要排序的图标1：", desktopIcons);

@@ -7,7 +7,7 @@
       <div
         class="py-2 px-4 flex justify-center items-center cursor-pointer"
         :class="
-          desktopAppearance.theme === 'light'
+          theme === 'light'
             ? 'bg-blue-500 text-slate-100 dark:bg-blue-700 dark:text-slate-200'
             : ''
         "
@@ -18,7 +18,7 @@
       <div
         class="py-2 px-4 flex justify-center items-center cursor-pointer"
         :class="
-          desktopAppearance.theme === 'dark'
+          theme === 'dark'
             ? 'bg-blue-500 text-slate-100 dark:bg-blue-700 dark:text-slate-200'
             : ''
         "
@@ -29,7 +29,7 @@
       <div
         class="py-2 px-4 flex justify-center items-center cursor-pointer"
         :class="
-          desktopAppearance.theme === 'auto'
+          theme === 'auto'
             ? 'bg-blue-500 text-slate-100 dark:bg-blue-700 dark:text-slate-200'
             : ''
         "
@@ -42,13 +42,10 @@
 </template>
 
 <script setup>
-import { onMounted, defineProps, inject } from "vue";
+import { onMounted, defineProps, inject, ref } from "vue";
+import { getDesktopAppearance } from "@/functions/desktop/desktopAppearance";
 
 const props = defineProps({
-  desktopAppearance: {
-    type: Object,
-    required: true,
-  },
   setDesktopAppearance: {
     type: Function,
     required: true,
@@ -56,27 +53,27 @@ const props = defineProps({
 });
 
 const utools = inject("utools");
+const theme = ref(getDesktopAppearance().theme);
 
 onMounted(() => {
-  setTheme(props.desktopAppearance.theme);
+  setTheme(theme.value);
 });
 
-// // 设置主题
-function setTheme(theme) {
-  if (theme === "auto") {
+// 设置主题
+function setTheme(themeName) {
+  theme.value = themeName;
+  if (themeName === "auto") {
     utools.isDarkColors()
       ? document.documentElement.classList.add("dark")
       : document.documentElement.classList.remove("dark");
-  } else if (theme === "light") {
+  } else if (themeName === "light") {
     document.documentElement.classList.remove("dark");
-  } else if (theme === "dark") {
+  } else if (themeName === "dark") {
     document.documentElement.classList.add("dark");
   }
-  const newDesktopAppearance = {
-    ...props.desktopAppearance,
-    theme: theme,
-  };
-  props.setDesktopAppearance(newDesktopAppearance);
+  props.setDesktopAppearance({
+    theme: themeName,
+  });
 }
 </script>
 <style scoped></style>

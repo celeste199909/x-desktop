@@ -10,6 +10,7 @@ const defaultDesktopFunction = {
             name: "桌面",
             path: getUserDesktopPath(),
             active: true,
+            sortInfo: [],
         }
     ]
 }

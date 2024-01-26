@@ -45,31 +45,23 @@ const xfolderClassName = computed(() => {
 function expandXfolder(event) {
     event.stopPropagation();
     if (isContract.value) {
-        console.log("click contract xfolder");
         isContract.value = false;
     }
 }
 
 
 function onMove(event) {
-    console.log("onMove xfolder", event);
     const toPageIndex = parseInt(event.to.id.split('-').pop());
     // 不是同一个页面，且拖动至页面区域
     if (event.from.id !== event.to.id && event.to.className === 'draggable-area') {
         // 收起文件夹
-        console.log("收起文件夹");
         isContract.value = true;
         event.dragged.className = "icon on-desktop"
         // event.dragged.children[0].className = "icon-image on-desktop"
         // event.dragged.children[0].className = "icon-name on-desktop"
 
-        // console.log("toPageIndex", toPageIndex);
-        // console.log("pages[toPageIndex]", pages.value[toPageIndex]);
-        if (pages.value[toPageIndex].length >= layout.value.pageCapacity) {
-            // console.log("toPageIndex", toPageIndex);
-            // console.log("pages[toPageIndex]", pages[toPageIndex]);
+        if (pages.value[toPageIndex].length >= layout.value.pageSize) {
             // 放回原位
-            console.log("页面已满");
             return false; // 拒绝添加到 area 中
         }
     }
@@ -89,16 +81,12 @@ function onMove(event) {
 }
 
 function onSort(event) {
-    console.log("onSort xfolder", event);
-    console.log("pages.value xfolder", pages.value);
 }
 
 function onStart() {
-    console.log("onStart xfolder");
 }
 
 function onEnd() {
-    console.log("onEnd xfolder");
 }
 
 // 点击其它地方，收起文件夹

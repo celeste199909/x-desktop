@@ -8,6 +8,8 @@
 </template>
 
 <script setup>
+import { getDesktopFunction } from "@/functions/desktop/desktopFunction";
+
 function resetDesktopAppearance() {
   console.log("重置外观");
 }
