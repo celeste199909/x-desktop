@@ -17,7 +17,7 @@
       <div
         v-for="item in iconPaths"
         :key="item.id"
-        class="path-card w-full transition-all h-20 flex flex-row gap-x-2 py-4 px-5 justify-between items-center rounded-2xl border-[3px] hover:border-blue-500"
+        class="path-card w-full transition-all h-28 flex flex-col gap-x-2 py-4 px-5 justify-start items-start rounded-2xl border-[3px] hover:border-blue-500"
         :class="item.active ? 'border-blue-500' : 'border-slate-400'"
       >
         <!-- 名字和路径 -->
@@ -35,17 +35,23 @@
             {{ item.path }}
           </div>
         </div>
-        <!-- 图标数量 和 删除 -->
-        <div class="flex w-16 flex-col justify-center items-center gap-y-1">
+        <!-- 启用 删除 收纳 -->
+        <div class="flex w-full flex-row justify-start items-center gap-x-4">
           <div
             class="text-blue-500 hover:font-bold hover:underline cursor-pointer"
             @click="toggleActive(item)"
           >
-            {{ item.active ? "不启用" : "启用" }}
+            {{ item.active ? "禁用" : "启用" }}
+          </div>
+          <div
+            class="text-blue-500 hover:font-bold hover:underline cursor-pointer"
+            @click="toggleFolder(item)"
+          >
+            {{ item.isFolded ? "释放" : "收纳" }}
           </div>
           <div
             v-if="item.id !== 'desktop'"
-            class="w-8 h-8 flex justify-center items-center text-red-400 hover:text-red-500 hover:font-bold cursor-pointer"
+            class="text-red-400 hover:text-red-500 hover:font-bold cursor-pointer"
             @click="handleRemovePath(item)"
           >
             删除
@@ -93,6 +99,14 @@ const props = defineProps({
     type: Function,
     required: true,
   },
+  foldPath: {
+    type: Function,
+    default: () => {},
+  },
+  unfoldPath: {
+    type: Function,
+    default: () => {},
+  },
 });
 
 // iconPaths: [{ name: "桌面", path: getUserDesktopPath(), active: true,} ...]
@@ -120,6 +134,7 @@ function handleAddPath() {
     name: _.last(newPath.split("\\")),
     path: newPath,
     active: false,
+    isFolded: false,
     sortInfo: [],
   };
 
@@ -130,8 +145,11 @@ function handleAddPath() {
 }
 // 删除路径
 function handleRemovePath(path) {
-  // 先将激活的路径设置为false
-  toggleActive(path)
+  // 先将激活的路径设置为 false
+  const index = _.findIndex(iconPaths.value, { id: path.id });
+  iconPaths.value[index].active = false;
+  props.setDesktopFunction({ iconPaths: iconPaths.value });
+  props.inactivePath(path);
   // 再删除路径
   _.remove(iconPaths.value, { id: path.id });
   props.setDesktopFunction({ iconPaths: iconPaths.value });
@@ -144,11 +162,15 @@ function toggleActive(path) {
   const isActive = path.active;
   const index = _.findIndex(iconPaths.value, { id: path.id });
 
-  console.log('%c [ isActive ]-144', 'font-size:13px; background:pink; color:#bf2c9f;', isActive)
+  console.log(
+    "%c [ isActive ]-144",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    isActive
+  );
   if (isActive) {
     // iconPaths 当前是否只有一个激活的路径
     const activeItems = iconPaths.value.filter((item) => item.active);
-    console.log('[ activeItems ] >', activeItems)
+    console.log("[ activeItems ] >", activeItems);
     const hasOnlyOneActive = activeItems.length === 1;
     if (hasOnlyOneActive) {
       showToast("至少保留一个启用的路径");
@@ -161,6 +183,25 @@ function toggleActive(path) {
     iconPaths.value[index].active = true;
     props.setDesktopFunction({ iconPaths: iconPaths.value });
     props.activePath(path);
+  }
+}
+
+// 切换收纳状态
+function toggleFolder(path) {
+  if (!path.active) {
+    showToast("请先启用该路径");
+    return;
+  }
+  const isFolded = path.isFolded;
+  const index = _.findIndex(iconPaths.value, { id: path.id });
+  if (isFolded) {
+    iconPaths.value[index].isFolded = false;
+    props.setDesktopFunction({ iconPaths: iconPaths.value });
+    props.unfoldPath(path);
+  } else {
+    iconPaths.value[index].isFolded = true;
+    props.setDesktopFunction({ iconPaths: iconPaths.value });
+    props.foldPath(path);
   }
 }
 

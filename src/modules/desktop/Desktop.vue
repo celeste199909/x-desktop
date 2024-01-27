@@ -28,6 +28,8 @@
       :removePath="removePath"
       :activePath="activePath"
       :inactivePath="inactivePath"
+      :foldPath="foldPath"
+      :unfoldPath="unfoldPath"
     />
     <!-- 右键菜单 -->
     <ContextMenu
@@ -83,6 +85,7 @@ import { getDesktopSortInfo } from "@/functions/desktop/desktopSortInfo";
 import { handleRawIcons } from "@/functions/desktop/handleRawIcons";
 // showToast
 import showToast from "@/components/toast/index";
+import _ from "lodash";
 
 // 来自 App.vue
 const currentModule = inject("currentModule");
@@ -122,16 +125,44 @@ function paginateIcons(icons) {
   let _page = [];
   iconPaths.forEach((path) => {
     const pathId = path.id;
-    const _pageIcons = [..._icons[pathId]];
+    const thePathIcons = [..._icons[pathId]];
+    const isFolded = path.isFolded;
+    const isActive = path.active;
     // 如果路径未激活，则跳过
-    if (!path.active) return;
-    for (let i = 0; i < _pageIcons.length; i++) {
+    if (!isActive) return;
+    // 如果路径被收纳，则创建文件夹
+    if (isFolded) {
+      const xfolder = {
+        type: "xfolder",
+        id: path.id,
+        name: path.name,
+        path: path.path,
+        isFolded: true,
+        sortInfo: path.sortInfo,
+        icons: thePathIcons,
+      };
       if (_page.length < pageSize) {
-        _page.push(_pageIcons[i]);
+        _page.push(xfolder);
       } else {
         _pages.push(_page);
         _page = [];
-        _page.push(_pageIcons[i]);
+        _page.push(xfolder);
+      }
+    } else {
+      // 如果路径未被收纳，则创建图标
+      for (let i = 0; i < thePathIcons.length; i++) {
+        const icon = {
+          type: "icon",
+          ...thePathIcons[i],
+        };
+        // 如果当前页未满，则添加到当前页
+        if (_page.length < pageSize) {
+          _page.push(icon);
+        } else {
+          _pages.push(_page);
+          _page = [];
+          _page.push(icon);
+        }
       }
     }
   });
@@ -177,8 +208,24 @@ function removePath(path) {
     showToast("至少保留一个路径");
     return;
   }
-  // 将该路径下的图标从 icons 中删除
-  delete icons.value[path.id];
+  // 1 如果该路径下的图标已经被收纳，则在pagedIcons找到该图标所在的文件夹，删除该文件夹
+  // 此前已调用 inactivePath ，将该路径下的图标已从 pagedIcons 中删除
+  const pathId = path.id;
+  const isFolded = path.isFolded;
+  if (isFolded) {
+    pagedIcons.value = pagedIcons.value.map((page) => {
+      const newPage = page.filter((obj) => {
+        if (obj.type === "xfolder" && obj.id === pathId) {
+          return false;
+        } else {
+          return true;
+        }
+      });
+      return newPage;
+    });
+  }
+  // 2 将该路径下的图标从 icons 中删除
+  delete icons.value[pathId];
   console.log(
     "%c [ 删除路径 ]-163",
     "font-size:13px; background:pink; color:#bf2c9f;",
@@ -213,7 +260,6 @@ async function activePath(path) {
 
 // 不启用路径
 function inactivePath(path) {
-
   const remveId = path.id;
   // 将该路径下的图标从 pagedicons中删除
   const newpagedIcons = pagedIcons.value.map((page) => {
@@ -237,7 +283,119 @@ function inactivePath(path) {
   );
 }
 
-// 桌面外观
+// 收纳到文件夹中
+function foldPath(path) {
+  // const pathModel = {
+  //   active: true,
+  //   id: "desktop",
+  //   isFolded: true,
+  //   name: "桌面",
+  //   path: "C:\\Users\\celeste\\Desktop",
+  //   sortInfo: [],
+  // };
+  // 如果还没有启用，提示先启用
+  if (!path.active) {
+    showToast("请先启用该路径");
+    return;
+  }
+  // 从 pagedIcons 中获取路径下的图标，移到文件夹中
+  const pathId = path.id;
+  const thePathIcons = [];
+  pagedIcons.value = pagedIcons.value.map((page) => {
+    const newPage = page.filter((icon) => {
+      if (icon.fromPathId === pathId) {
+        thePathIcons.push(icon);
+        return false;
+      } else {
+        return true;
+      }
+    });
+    return newPage;
+  });
+
+  // 新建文件夹，添加到 pagedIcons 中
+  const xfolder = {
+    type: "xfolder",
+    id: path.id,
+    name: path.name,
+    path: path.path,
+    isFolded: false,
+    sortInfo: path.sortInfo,
+    icons: thePathIcons,
+  };
+  const pageSize = getDesktopLayout().pageSize;
+  let currentPage = pagedIcons.value.length - 1;
+
+  if (pagedIcons.value[currentPage].length < pageSize) {
+    pagedIcons.value[currentPage].push(xfolder);
+  } else {
+    pagedIcons.value.push([]);
+    currentPage++;
+    pagedIcons.value[currentPage].push(xfolder);
+    moveToPage({ pageIndex: currentPage });
+  }
+  // 把 iocnPaths 中的路径isFolded设置为 true
+  const iconPaths = getDesktopFunction().iconPaths;
+  const index = _.findIndex(iconPaths, { id: pathId });
+  iconPaths[index].isFolded = true;
+  setDesktopFunction({ iconPaths: iconPaths });
+
+  console.log(
+    "%c [ 收纳到文件夹中 ]-176",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    getDesktopFunction()
+  );
+  console.log(
+    "%c [ 收纳的图标 ]-176",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    xfolder
+  );
+}
+
+// 从文件夹中释放
+function unfoldPath(path) {
+  // 找到 pagedIcons 中type 为 xfolder 且 id 为 path.id 的图标，移到桌面中
+  const pathId = path.id;
+  let thePathIcons = [];
+  pagedIcons.value = pagedIcons.value.map((page) => {
+    const newPage = page.filter((obj) => {
+      if (obj.type === 'xfolder' && obj.id === pathId) {
+        thePathIcons = [...obj.icons];
+        return false;
+      }else {
+        return true;
+      }
+    });
+    return newPage;
+  });
+  // 将图标添加到 pagedIcons 中
+  const pageSize = getDesktopLayout().pageSize;
+  const _thePathIcons = [...thePathIcons];
+  _thePathIcons.forEach((icon) => {
+    let currentPage = pagedIcons.value.length - 1;
+    if (pagedIcons.value[currentPage].length < pageSize) {
+      pagedIcons.value[currentPage].push(icon);
+    } else {
+      pagedIcons.value.push([]);
+      currentPage++;
+      pagedIcons.value[currentPage].push(icon);
+      moveToPage({ pageIndex: currentPage });
+    }
+  });
+  // 把 iocnPaths 中的路径isFolded设置为 false
+  const iconPaths = getDesktopFunction().iconPaths;
+  const index = _.findIndex(iconPaths, { id: pathId });
+  iconPaths[index].isFolded = false;
+  setDesktopFunction({ iconPaths: iconPaths });
+
+
+  console.log(
+    "%c [ 从文件夹中释放 ]-176",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    getDesktopFunction()
+  );
+}
+// --- 桌面外观
 function setDesktopAppearance(updateObj) {
   const newDesktopAppearance = {
     ...getDesktopAppearance(),
@@ -254,7 +412,7 @@ function setDesktopAppearance(updateObj) {
   );
 }
 
-// 桌面功能
+// --- 桌面功能
 function setDesktopFunction(updateObj) {
   const newDesktopFunction = {
     ...getDesktopFunction(),
@@ -265,25 +423,37 @@ function setDesktopFunction(updateObj) {
     JSON.parse(JSON.stringify(newDesktopFunction))
   );
   console.log(
-    "%c [ 桌面功能设置更新, 已保存至本地 ]-173",
+    "%c [ 桌面 function 设置更新, 已保存至本地 ]-173",
     "font-size:13px; background:blue; color:white;",
     getDesktopFunction()
   );
 }
 
 // 桌面排序信息
-const desktopSortInfo = ref(getDesktopSortInfo());
-watchDeep(desktopSortInfo, (newVal) => {
+// [
+// [
+//   {
+//     "id":"xxx",
+//     "iconRawName":"xxx",
+//     "fromPathId":"xxx",
+//     "isFolded":false,
+//   }
+// ],
+// [],
+// []
+// ]
+const desktopSortInfo = ref(getDesktopSortInfo()); // 本地 desktopSortInfo
+
+function setDesktopSortInfo(newVal) {
+  desktopSortInfo.value = newVal;
   utools.dbStorage.setItem(
     "desktopSortInfo",
     JSON.parse(JSON.stringify(newVal))
   );
-});
-function setDesktopSortInfo(newVal) {
-  desktopSortInfo.value = newVal;
 }
 // 更新排序信息
 const { updateSortInfo } = useUpdateSortInfo(pagedIcons, setDesktopSortInfo);
+
 // 当前页
 const currentPage = ref(0); // 当前页 emit: setCurrentPage
 function setCurrentPage(value) {

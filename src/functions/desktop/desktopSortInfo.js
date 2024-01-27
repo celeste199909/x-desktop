@@ -5,10 +5,7 @@
 const getDesktopSortInfo = function () {
     const localSortInfo = utools.dbStorage.getItem("desktopSortInfo");
     if (!localSortInfo) {
-        utools.dbStorage.setItem("desktopSortInfo", {
-            allPathsSortInfo: {},
-            pagedIconsSortInfo: []
-        });
+        utools.dbStorage.setItem("desktopSortInfo", []);
         return [];
     } else {
         // console.log("desktopSortInfo", localSortInfo);

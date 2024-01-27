@@ -43,7 +43,7 @@ const defaultDesktopAppearance = {
     bgOpacity: 50,
 }
 
-let icon = {
+const icon = {
     rawName: rawIcon.rawName,
     iconImage: rawIcon.iconImage,
     realPath: rawIcon.realPath,
@@ -55,5 +55,29 @@ let icon = {
     searchKeywords: getSearchKeywords(showName),
     fromPath: rawIcon.fromPath,
     fromPathId: rawIcon.fromPathId,
-    fromPathName: rawIcon.pathName
+    fromPathName: rawIcon.fromPathName
   };
+
+const desktopSortInfo = 
+[ 
+[
+  {
+    "id":"xxx",
+    "iconRawName":"xxx",
+    "fromPathId":"xxx",
+    "isFolded":false,
+  }
+], 
+[], 
+[]
+]
+
+const xfolder = {
+    id: nanoid(),
+    name: "xxx",
+    path: "xxx",
+    isFolded: false,
+    children: [
+        {}
+    ]
+}

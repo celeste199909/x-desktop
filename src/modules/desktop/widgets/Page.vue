@@ -22,10 +22,15 @@
       @end="onEnd"
       @move="onMove"
     >
-      <div v-for="item in pagedIcons[pageIndex]" :key="item.id" class="draggable">
+      <div
+        v-for="item in pagedIcons[pageIndex]"
+        :key="item.id"
+        class="draggable"
+      >
+        <Xfolder v-if="item.type === 'xfolder'" :xfolder="item" :isOnQuickSearchMode="isOnQuickSearchMode"/>
         <Application
+          v-else
           :icon="item"
-          :place="'on-desktop'"
           :isOnQuickSearchMode="isOnQuickSearchMode"
         />
       </div>
@@ -37,6 +42,7 @@
 import { ref, defineProps, defineEmits } from "vue";
 import { VueDraggable } from "vue-draggable-plus";
 import Application from "@/modules/desktop/icons/Application.vue";
+import Xfolder from "@/modules/desktop/icons/Xfolder.vue";
 import { getDesktopLayout } from "@/functions/desktop/desktopAppearance";
 import _ from "lodash";
 

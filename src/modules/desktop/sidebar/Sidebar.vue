@@ -45,6 +45,8 @@
             :removePath="removePath"
             :activePath="activePath"
             :inactivePath="inactivePath"
+            :foldPath="foldPath"
+            :unfoldPath="unfoldPath"
           ></component>
         </template>
       </div>
@@ -101,6 +103,14 @@ const props = defineProps({
     default: () => {},
   },
   inactivePath: {
+    type: Function,
+    default: () => {},
+  },
+  foldPath: {
+    type: Function,
+    default: () => {},
+  },
+  unfoldPath: {
     type: Function,
     default: () => {},
   },
