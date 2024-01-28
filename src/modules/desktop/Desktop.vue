@@ -15,7 +15,7 @@
           @setIsDragging="setIsDragging"
           :isOnQuickSearchMode="isOnQuickSearchMode"
           :moveToPage="moveToPage"
-          :updateSortInfo="updateSortInfo"
+          :saveNowSortInfo="saveNowSortInfo"
         />
       </div>
     </div>
@@ -30,6 +30,7 @@
       :inactivePath="inactivePath"
       :foldPath="foldPath"
       :unfoldPath="unfoldPath"
+      :saveNowSortInfo="saveNowSortInfo"
     />
     <!-- 右键菜单 -->
     <ContextMenu
@@ -37,8 +38,11 @@
       @showContextMenu="showContextMenu"
       :isShowSidebar="isShowSidebar"
       @showSidebar="showSidebar"
+      :pagedIcons="pagedIcons"
       :currentPage="currentPage"
       :moveToPage="moveToPage"
+      :addPage="addPage"
+      :removePage="removePage"
     />
     <!-- 页面指示器 -->
     <PageIndicator
@@ -86,6 +90,7 @@ import { handleRawIcons } from "@/functions/desktop/handleRawIcons";
 // showToast
 import showToast from "@/components/toast/index";
 import _ from "lodash";
+import { nanoid } from "nanoid";
 
 // 来自 App.vue
 const currentModule = inject("currentModule");
@@ -120,54 +125,93 @@ function paginateIcons(icons) {
   const iconPaths = getDesktopFunction().iconPaths;
   // 获取页面容量
   const pageSize = getDesktopLayout().pageSize;
+  // 排序信息
+  const sortInfo = getDesktopSortInfo();
+  console.log(
+    "%c [ 开始排序分页 ]-125",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    sortInfo
+  );
   let _icons = { ...icons };
-  let _pages = [];
-  let _page = [];
-  iconPaths.forEach((path) => {
-    const pathId = path.id;
-    const thePathIcons = [..._icons[pathId]];
-    const isFolded = path.isFolded;
-    const isActive = path.active;
-    // 如果路径未激活，则跳过
-    if (!isActive) return;
-    // 如果路径被收纳，则创建文件夹
-    if (isFolded) {
-      const xfolder = {
-        type: "xfolder",
-        id: path.id,
-        name: path.name,
-        path: path.path,
-        isFolded: true,
-        sortInfo: path.sortInfo,
-        icons: thePathIcons,
-      };
-      if (_page.length < pageSize) {
-        _page.push(xfolder);
-      } else {
-        _pages.push(_page);
-        _page = [];
-        _page.push(xfolder);
-      }
-    } else {
-      // 如果路径未被收纳，则创建图标
-      for (let i = 0; i < thePathIcons.length; i++) {
-        const icon = {
-          type: "icon",
-          ...thePathIcons[i],
-        };
-        // 如果当前页未满，则添加到当前页
-        if (_page.length < pageSize) {
-          _page.push(icon);
+  // 如果有排序信息，则按照排序信息排序
+  if (sortInfo.length > 0) {
+    let pages = [];
+    sortInfo.forEach((pageSortInfo) => {
+      let page = [];
+      pageSortInfo.forEach((iconSortInfo) => {
+        if (iconSortInfo.type === "xfolder") {
+          const pathId = iconSortInfo.id;
+          const xfolder = {
+            type: "xfolder",
+            id: pathId,
+            name: iconSortInfo.name,
+            path: iconSortInfo.path,
+            isFolded: true,
+            sortInfo: iconSortInfo.sortInfo,
+            icons: _icons[pathId],
+          };
+          page.push(xfolder);
         } else {
-          _pages.push(_page);
-          _page = [];
-          _page.push(icon);
+          const pathId = iconSortInfo.fromPathId;
+          const icon = _icons[pathId].find((icon) => {
+            return icon.rawName === iconSortInfo.rawName;
+          });
+          page.push(icon);
+        }
+      });
+      pages.push(page);
+    });
+    return pages;
+  } else {
+    // 如果没有排序信息
+    let pages = [];
+    let page = [];
+    iconPaths.forEach((path) => {
+      const pathId = path.id;
+      const thePathIcons = [..._icons[pathId]];
+      const isFolded = path.isFolded;
+      const isActive = path.active;
+      // 如果路径未激活，则跳过
+      if (!isActive) return;
+      // 如果路径被收纳，则创建文件夹
+      if (isFolded) {
+        const xfolder = {
+          type: "xfolder",
+          id: path.id,
+          name: path.name,
+          path: path.path,
+          isFolded: true,
+          sortInfo: path.sortInfo,
+          icons: thePathIcons,
+        };
+        if (page.length < pageSize) {
+          page.push(xfolder);
+        } else {
+          pages.push(page);
+          page = [];
+          page.push(xfolder);
+        }
+      } else {
+        // 如果路径未被收纳，则创建图标
+        for (let i = 0; i < thePathIcons.length; i++) {
+          const icon = {
+            type: "icon",
+            ...thePathIcons[i],
+          };
+          // 如果当前页未满，则添加到当前页
+          if (page.length < pageSize) {
+            page.push(icon);
+          } else {
+            pages.push(page);
+            page = [];
+            page.push(icon);
+          }
         }
       }
-    }
-  });
-  _pages.push(_page);
-  return _pages;
+    });
+    pages.push(page);
+    return pages;
+  }
 }
 
 async function loadAllIcons() {
@@ -231,6 +275,7 @@ function removePath(path) {
     "font-size:13px; background:pink; color:#bf2c9f;",
     icons.value
   );
+  saveNowSortInfo();
 }
 
 // 启用路径
@@ -239,35 +284,75 @@ async function activePath(path) {
   const handledIcons = await loadIcons(path);
   const pageSize = getDesktopLayout().pageSize;
   const _handledIcons = [...handledIcons];
-  _handledIcons.forEach((icon) => {
+  const isFolded = path.isFolded;
+  if (isFolded) {
+    const xfolder = {
+      type: "xfolder",
+      id: path.id,
+      name: path.name,
+      path: path.path,
+      isFolded: true,
+      sortInfo: path.sortInfo,
+      icons: _handledIcons,
+    };
     let currentPage = pagedIcons.value.length - 1;
     if (pagedIcons.value[currentPage].length < pageSize) {
-      pagedIcons.value[currentPage].push(icon);
+      pagedIcons.value[currentPage].push(xfolder);
     } else {
       pagedIcons.value.push([]);
       currentPage++;
-      pagedIcons.value[currentPage].push(icon);
+      pagedIcons.value[currentPage].push(xfolder);
       moveToPage({ pageIndex: currentPage });
     }
-  });
+  } else {
+    _handledIcons.forEach((icon) => {
+      let currentPage = pagedIcons.value.length - 1;
+      if (pagedIcons.value[currentPage].length < pageSize) {
+        pagedIcons.value[currentPage].push(icon);
+      } else {
+        pagedIcons.value.push([]);
+        currentPage++;
+        pagedIcons.value[currentPage].push(icon);
+        moveToPage({ pageIndex: currentPage });
+      }
+    });
+  }
 
   console.log(
     "%c [ 启用路径 ]-157",
     "font-size:13px; background:pink; color:#bf2c9f;",
     pagedIcons.value
   );
+  saveNowSortInfo();
 }
 
 // 不启用路径
 function inactivePath(path) {
   const remveId = path.id;
-  // 将该路径下的图标从 pagedicons中删除
-  const newpagedIcons = pagedIcons.value.map((page) => {
-    return page.filter((icon) => {
-      return icon.fromPathId !== remveId;
+  // 如果该路径下的图标已经被收纳，则在pagedIcons找到该图标所在的文件夹，删除该文件夹
+  const isFolded = path.isFolded;
+  if (isFolded) {
+    pagedIcons.value = pagedIcons.value.map((page) => {
+      const newPage = page.filter((obj) => {
+        if (obj.type === "xfolder" && obj.id === remveId) {
+          return false;
+        } else {
+          return true;
+        }
+      });
+      return newPage;
     });
-  });
-  pagedIcons.value = newpagedIcons;
+  } else {
+    // 如果该路径下的图标未被收纳，则在pagedIcons找到该图标，删除该图标
+    // // 将该路径下的图标从 pagedicons中删除
+    const newpagedIcons = pagedIcons.value.map((page) => {
+      return page.filter((icon) => {
+        return icon.fromPathId !== remveId;
+      });
+    });
+    pagedIcons.value = newpagedIcons;
+  }
+
   // 如果有空页面，则删除
   pagedIcons.value = pagedIcons.value.filter((page) => {
     return page.length > 0;
@@ -281,6 +366,7 @@ function inactivePath(path) {
     "font-size:13px; background:pink; color:#bf2c9f;",
     pagedIcons.value
   );
+  saveNowSortInfo();
 }
 
 // 收纳到文件夹中
@@ -350,6 +436,7 @@ function foldPath(path) {
     "font-size:13px; background:pink; color:#bf2c9f;",
     xfolder
   );
+  saveNowSortInfo();
 }
 
 // 从文件夹中释放
@@ -359,10 +446,10 @@ function unfoldPath(path) {
   let thePathIcons = [];
   pagedIcons.value = pagedIcons.value.map((page) => {
     const newPage = page.filter((obj) => {
-      if (obj.type === 'xfolder' && obj.id === pathId) {
+      if (obj.type === "xfolder" && obj.id === pathId) {
         thePathIcons = [...obj.icons];
         return false;
-      }else {
+      } else {
         return true;
       }
     });
@@ -388,12 +475,12 @@ function unfoldPath(path) {
   iconPaths[index].isFolded = false;
   setDesktopFunction({ iconPaths: iconPaths });
 
-
   console.log(
     "%c [ 从文件夹中释放 ]-176",
     "font-size:13px; background:pink; color:#bf2c9f;",
     getDesktopFunction()
   );
+  saveNowSortInfo();
 }
 // --- 桌面外观
 function setDesktopAppearance(updateObj) {
@@ -430,18 +517,6 @@ function setDesktopFunction(updateObj) {
 }
 
 // 桌面排序信息
-// [
-// [
-//   {
-//     "id":"xxx",
-//     "iconRawName":"xxx",
-//     "fromPathId":"xxx",
-//     "isFolded":false,
-//   }
-// ],
-// [],
-// []
-// ]
 const desktopSortInfo = ref(getDesktopSortInfo()); // 本地 desktopSortInfo
 
 function setDesktopSortInfo(newVal) {
@@ -450,14 +525,79 @@ function setDesktopSortInfo(newVal) {
     "desktopSortInfo",
     JSON.parse(JSON.stringify(newVal))
   );
+
+  console.log(
+    "%c [ 保存桌面排序信息 ]-480",
+    "font-size:13px; background:green; color:white;",
+    getDesktopSortInfo()
+  );
+}
+
+function saveNowSortInfo() {
+  const nowSortInfo = [];
+  pagedIcons.value.forEach((page) => {
+    const pageSortInfo = [];
+    page.forEach((obj) => {
+      let iconSortInfo = {};
+      if (obj.type === "xfolder") {
+        iconSortInfo = {
+          type: "xfolder",
+          id: obj.id,
+          name: obj.name,
+          path: obj.path,
+          isFolded: obj.isFolded,
+          sortInfo: obj.sortInfo,
+          // icons: obj.icons,
+        };
+      } else {
+        iconSortInfo = {
+          type: "icon",
+          rawName: obj.rawName,
+          fromPathId: obj.fromPathId,
+        };
+      }
+      pageSortInfo.push(iconSortInfo);
+    });
+    nowSortInfo.push(pageSortInfo);
+  });
+  setDesktopSortInfo(nowSortInfo);
 }
 // 更新排序信息
-const { updateSortInfo } = useUpdateSortInfo(pagedIcons, setDesktopSortInfo);
+// const { updateSortInfo } = useUpdateSortInfo(pagedIcons, setDesktopSortInfo);
 
 // 当前页
 const currentPage = ref(0); // 当前页 emit: setCurrentPage
 function setCurrentPage(value) {
   currentPage.value = value;
+}
+
+// 添加页面
+function addPage(){
+  const newPage = [];
+  pagedIcons.value.push(newPage);
+  moveToPage({ pageIndex: currentPage.value, transition: false });
+  saveNowSortInfo();
+}
+
+// 删除页面
+function removePage() {
+  // 如果只有一页，则不删除
+  if (pagedIcons.value.length === 1) {
+    showToast("至少保留一个页面");
+    return;
+  }
+  // 如果不为空，则不删除
+  if (pagedIcons.value[currentPage.value].length > 0) {
+    showToast("页面不为空，不能删除");
+    return;
+  }
+  // 删除当前页
+  pagedIcons.value.splice(currentPage.value, 1);
+  // 如果当前页是最后一页，则切换至前一页
+  if (currentPage.value === pagedIcons.value.length) {
+    moveToPage({ pageIndex: currentPage.value - 1, transition: true });
+  }
+  saveNowSortInfo();
 }
 
 // 翻页功能

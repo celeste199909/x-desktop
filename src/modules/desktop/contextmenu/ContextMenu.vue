@@ -58,6 +58,14 @@ const props = defineProps({
     type: Function,
     required: true,
   },
+  addPage: {
+    type: Function,
+    required: true,
+  },
+  removePage: {
+    type: Function,
+    required: true,
+  },
 });
 
 const utools = inject("utools");
@@ -140,36 +148,27 @@ window.addEventListener("click", (e) => {
 
 // 打开图标
 function openApp(event) {
-  const iconId = clickTarget.value.id.split("-")[2];
+  var pattern = /icon-image-(.*)/; // 使用正则表达式捕获括号中的内容
+  const result = clickTarget.value.id.match(pattern);
+
+  const iconId = result[1];
   const icon = props.pagedIcons[props.currentPage].find(
     (item) => item.id === iconId
   );
+
+  if (!icon) return;
   utools.shellOpenPath(icon.realPath);
   window.hideDesk();
 }
 
 // 新建页面
 function newPage() {
-  console.log("新建页面");
-  // props.pagedIcons.push([]);
-  // props.moveToPage({ pageIndex: props.currentPage, transition: false });
+  props.addPage();
 }
 
 // 删除页面
 function removePage() {
-  console.log("删除页面");
-  // 如果页面为空,则删除
-  // if (props.pagedIcons[props.currentPage].length === 0) {
-  //   props.pagedIcons.splice(props.currentPage, 1);
-  //   // 如果当前页面是最后一页，则切换至前一页
-  //   if (props.currentPage === props.pagedIcons.length) {
-  //     props.moveToPage({ pageIndex: props.currentPage - 1, transition: true });
-  //   }
-  // } else {
-  //   // toast
-  //   console.log("当前页面不为空，不能删除");
-  //   showToast("页面不为空，不能删除");
-  // }
+  props.removePage();
 }
 
 // 打开桌面设置
@@ -179,28 +178,5 @@ function openDesktopSetting(event) {
   emit("showSidebar", true);
 }
 
-// // 点击新建文件夹
-// function handleClickNewFolder() {
-//   // 如果页面容量已满，提示不能再添加
-//   if (props.pagedIcons[currentPage.value].length >= layout.value.pageSize) {
-//     console.log("页面容量已满，不能再添加文件夹");
-//     return;
-//   }
-//   console.log("新建文件夹");
-//   // 创建文件夹对象
-//   const xfolder = {
-//     id: nanoid(),
-//     name: "未命名文件夹",
-//     type: "xfolder",
-//     icons: [],
-//     searchKeywords: getSearchKeywords("未命名文件夹"),
-//   };
-//   console.log("xfolder", xfolder);
-//   props.pagedIcons[currentPage.value].push(xfolder);
-// }
-
-// function handleClickRemoveXFolder() {
-//   console.log("删除文件夹");
-// }
 </script>
 <style scoped></style>

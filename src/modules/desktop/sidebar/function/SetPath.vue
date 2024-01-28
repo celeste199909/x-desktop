@@ -107,6 +107,10 @@ const props = defineProps({
     type: Function,
     default: () => {},
   },
+  saveNowSortInfo: {
+    type: Function,
+    default: () => {},
+  },
 });
 
 // iconPaths: [{ name: "桌面", path: getUserDesktopPath(), active: true,} ...]

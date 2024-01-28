@@ -3,47 +3,111 @@
     id="steam"
     class="steam relative h-screen w-screen justify-center items-center flex flex-row overflow-hidden select-none"
   >
+    <!-- 游戏列表 -->
     >
     <VueDraggable
       class="w-full h-full p-20 flex flex-row justify-center flex-wrap gap-6 overflow-y-scroll"
-      v-model="_steamApps"
+      v-model="steamApps"
       ghostClass="ghost"
     >
       <div
-        v-for="item in _steamApps"
-        :key="item.id"
-        :id="item.id"
+        v-for="item in steamApps"
+        :key="item.appid"
+        :id="item.appid"
         class="card w-52 aspect-[6/9] overflow-hidden cursor-pointer"
-        @click="openSteamApp(item.realPath, $event)"
+        @click="openSteamApp(item, $event)"
       >
         <div class="card-inner w-full aspect-[6/9] overflow-hidden">
-          <img :src="getLocalImage(item.coverPath)" />
+          <img :src="getLocalImage(item.coverImage)" />
         </div>
       </div>
     </VueDraggable>
+    <!-- 未设置路径提示 -->
+    <div
+      v-if="steamApps.length === 0"
+      class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-2xl z-10"
+    >
+      <div class="text-center">
+        <div
+          class="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition-all duration-500 ease-in-out active:scale-105"
+          @click="setSteamRootPath"
+        >
+          选择 Steam 目录
+        </div>
+        <div
+          class="text-[14px] text-slate-400 mt-2 cursor-pointer hover:text-slate-100 hover:font-bold"
+        >
+          如何找到我的 Steam 目录？
+        </div>
+      </div>
+    </div>
     <MouseLight />
   </div>
 </template>
 
 <script setup>
-import { defineProps,ref } from "vue";
+import { defineProps, ref, onBeforeMount, inject } from "vue";
 import { VueDraggable } from "vue-draggable-plus";
 import MouseLight from "./widgets/MouseLight.vue";
+import _ from "lodash";
+import { getSteamRootPath } from "@/modules/steam/storage/steamPath.js";
+import showToast from "@/components/toast/index";
 
-const props = defineProps({
-  steamApps: {
-    type: Array,
-    required: true,
-  },
+const props = defineProps({});
+
+const utools = inject("utools");
+// steam 模块
+const steamApps = ref([]); // steam 应用
+const steamRootPath = ref(getSteamRootPath()); // steam 根目录
+
+onBeforeMount(() => {
+  initSteam();
 });
 
-const _steamApps = ref(props.steamApps);
+function setSteamRootPath() {
+  const paths = utools.showOpenDialog({
+    properties: ["openDirectory"],
+  });
+
+  console.log(
+    "%c [ paths ]-69",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    paths
+  );
+  // if (!paths) {
+  //   return;
+  // }
+  const path = paths[0];
+  steamRootPath.value = path;
+  utools.dbStorage.setItem("steamRootPath", path);
+  initSteam(path);
+}
+
+// 获取 steam 应用数据
+async function initSteam() {
+  if (!steamRootPath.value) {
+    showToast("请先设置 Steam 目录");
+    return;
+  }
+  try {
+    const result = await window.getSteamApps(steamRootPath.value);
+    steamApps.value = result;
+    console.log(
+      "%c [ 初始化 获取 steam 应用数据 ]-47",
+      "font-size:13px; background:green; color:white;",
+      steamApps.value
+    );
+  } catch (error) {
+    showToast("请确保设置了正确 Steam 目录");
+  }
+}
 
 // 打开 steam 应用
-function openSteamApp(realPath, event) {
+function openSteamApp(steamApp, event) {
   event.stopPropagation();
   event.preventDefault();
-  utools.shellOpenPath(realPath);
+  // utools.shellOpenPath(realPath);
+  window.openSteamApp(steamApp);
   window.hideDesk();
 }
 

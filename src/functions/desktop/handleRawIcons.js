@@ -14,7 +14,7 @@ export function handleRawIcons(rawIcons) {
   const handledIcons = [];
   rawIcons.forEach((rawIcon) => {
     // 对展示名称进行处理
-    const showName = rawIcon.rawName.replace(/\.[^/.]+$/, ""); // 去除文件后缀名
+    const showName = getShowName(rawIcon.rawName);
     // 返回的图标数据样例
     let icon = {
       rawName: rawIcon.rawName,
@@ -24,7 +24,7 @@ export function handleRawIcons(rawIcons) {
       type: getIconType(rawIcon.rawName),
       id: nanoid(),
       showName: showName,
-      suffix:  rawIcon.rawName.split(".").pop(),
+      suffix: rawIcon.rawName.split(".").pop(),
       searchKeywords: getSearchKeywords(showName),
       fromPath: rawIcon.fromPath,
       fromPathId: rawIcon.fromPathId,
@@ -35,17 +35,30 @@ export function handleRawIcons(rawIcons) {
   return handledIcons;
 }
 
+// 对展示名称进行处理
+function getShowName(rawName) {
+  let showName = ""
+  // 如果是以点开头的文件名，不做处理
+  if (rawName.startsWith(".")) {
+    showName = rawName;
+  } else {
+    showName = rawName.replace(/\.[^/.]+$/, ""); // 去除文件后缀名
+  }
+  return showName;
+}
+
 // 用于获取图标类型
 function getIconType(rawName) {
-  const splitList = rawName.split(".");
-  const suffix = splitList.pop();
-  if (suffix === "lnk") {
-    return "app";
-  } else if (splitList.length === 1) {
-    return "folder";
-  } else {
-    return "file";
-  }
+  return "icon"
+  // const splitList = rawName.split(".");
+  // const suffix = splitList.pop();
+  // if (suffix === "lnk") {
+  //   return "app";
+  // } else if (splitList.length === 1) {
+  //   return "folder";
+  // } else {
+  //   return "file";
+  // }
 }
 
 // 用于处理显示的名字获取搜索关键词

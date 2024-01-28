@@ -16,7 +16,7 @@
   >
     <img
       class="icon-image"
-      :id="`icon-iamge-${icon.id}`"
+      :id="`icon-image-${icon.id}`"
       :src="icon.iconImage"
       alt=""
       srcset=""

@@ -2,7 +2,7 @@ const defaultDesktopFunction = {
     hideShotcutKey: ["Control", ""],
     iconPaths: [
         {
-            id:"desktop",
+            id: "desktop",
             name: "桌面",
             path: getUserDesktopPath(),
             active: true,
@@ -51,33 +51,51 @@ const icon = {
     type: getIconType(rawIcon.rawName),
     id: nanoid(),
     showName: showName,
-    suffix:  rawIcon.rawName.split(".").pop(),
+    suffix: rawIcon.rawName.split(".").pop(),
     searchKeywords: getSearchKeywords(showName),
     fromPath: rawIcon.fromPath,
     fromPathId: rawIcon.fromPathId,
     fromPathName: rawIcon.fromPathName
-  };
+};
 
-const desktopSortInfo = 
-[ 
-[
-  {
-    "id":"xxx",
-    "iconRawName":"xxx",
-    "fromPathId":"xxx",
-    "isFolded":false,
-  }
-], 
-[], 
-[]
-]
-
-const xfolder = {
-    id: nanoid(),
-    name: "xxx",
-    path: "xxx",
-    isFolded: false,
-    children: [
-        {}
+const desktopSortInfo =
+    [
+        [
+            {
+                "id": "xxx",
+                "iconRawName": "xxx",
+                "fromPathId": "xxx",
+                "isFolded": false,
+            }
+        ],
+        [],
+        []
     ]
-}
+
+// const steamAppsPathFiles = [
+//   "appmanifest_1037020.acf",
+//   "appmanifest_1109570.acf",
+//   "appmanifest_1274140.acf",
+//   "appmanifest_1507970.acf",
+//   "appmanifest_1966900.acf",
+//   "appmanifest_228980.acf",
+//   "appmanifest_230290.acf",
+//   "appmanifest_250900.acf",
+//   "appmanifest_431730.acf",
+//   "appmanifest_431960.acf",
+//   "appmanifest_445980.acf",
+//   "appmanifest_460950.acf",
+//   "appmanifest_588650.acf",
+//   "appmanifest_632360.acf",
+//   "appmanifest_646570.acf",
+//   "appmanifest_788100.acf",
+//   "appmanifest_977880.acf",
+//   "common",
+//   "downloading",
+//   "libraryfolders.vdf",
+//   "shadercache",
+//   "sourcemods",
+//   "temp",
+//   "workshop"
+// ]
+// .acf 文件内容

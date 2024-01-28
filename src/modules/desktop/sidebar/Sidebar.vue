@@ -47,6 +47,7 @@
             :inactivePath="inactivePath"
             :foldPath="foldPath"
             :unfoldPath="unfoldPath"
+            :saveNowSortInfo="saveNowSortInfo"
           ></component>
         </template>
       </div>
@@ -111,6 +112,10 @@ const props = defineProps({
     default: () => {},
   },
   unfoldPath: {
+    type: Function,
+    default: () => {},
+  },
+  saveNowSortInfo: {
     type: Function,
     default: () => {},
   },

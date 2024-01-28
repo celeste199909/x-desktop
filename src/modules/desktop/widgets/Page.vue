@@ -9,13 +9,9 @@
       :id="'draggable-area-' + pageIndex"
       :group="{
         name: 'desktop',
-        put: ['desktop', 'xfolder', 'side'],
-        pull: ['desktop', 'xfolder', 'side'],
       }"
       :animation="150"
       ghostClass="ghost"
-      :forceFallback="true"
-      draggable=".draggable"
       v-model="pagedIcons[pageIndex]"
       :style="gridStyle"
       @start="onStart"
@@ -27,7 +23,11 @@
         :key="item.id"
         class="draggable"
       >
-        <Xfolder v-if="item.type === 'xfolder'" :xfolder="item" :isOnQuickSearchMode="isOnQuickSearchMode"/>
+        <Xfolder
+          v-if="item.type === 'xfolder'"
+          :xfolder="item"
+          :isOnQuickSearchMode="isOnQuickSearchMode"
+        />
         <Application
           v-else
           :icon="item"
@@ -45,6 +45,7 @@ import Application from "@/modules/desktop/icons/Application.vue";
 import Xfolder from "@/modules/desktop/icons/Xfolder.vue";
 import { getDesktopLayout } from "@/functions/desktop/desktopAppearance";
 import _ from "lodash";
+import showToast from "@/components/toast/index";
 
 // props
 const props = defineProps({
@@ -72,7 +73,7 @@ const props = defineProps({
     type: Function,
     required: true,
   },
-  updateSortInfo: {
+  saveNowSortInfo: {
     type: Function,
     required: true,
   },
@@ -82,6 +83,7 @@ const emit = defineEmits(["setCurrentPage", "setIsDragging"]);
 
 // 注入 来自 App.vue
 const layout = ref(getDesktopLayout());
+// const pageIcons = ref(props.pagedIcons[props.pageIndex]);
 
 // app容器 grid 布局
 const gridStyle = ref({
@@ -96,23 +98,29 @@ const gridStyle = ref({
 // 拖动图标至左右边缘时，切换页面
 function onMove(event) {
   const toPageIndex = parseInt(event.to.id.split("-").pop());
+  console.log(
+    "%c [ onMove(event) ]-100",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    event
+  );
   // 不是同一个页面，且拖动至页面区域
   if (
     event.from.id !== event.to.id &&
     event.to.className.split(" ").includes("draggable-area")
   ) {
     if (props.pagedIcons[toPageIndex].length >= layout.value.pageSize) {
+      showToast("页面已满");
       return false; // 拒绝添加到 area 中
     }
   }
   // 如果去往的是文件夹
-  if (event.to.className.split(" ").includes("xfolder-icons")) {
-    // 放回原位
-    return false;
-  }
+  // if (event.to.className.split(" ").includes("xfolder-icons")) {
+  //   // 放回原位
+  //   return false;
+  // }
 
   if (event.to.id === "right-area") {
-    if (props.currentPage < props.pagedIcons.value.length - 1) {
+    if (props.currentPage < props.pagedIcons.length - 1) {
       props.moveToPage({ pageIndex: props.currentPage + 1, transition: true });
       return;
     }
@@ -132,10 +140,11 @@ function onStart(event) {
     emit("setIsDragging", true);
   }
 }
+
 // 结束拖拽
 function onEnd(event) {
   emit("setIsDragging", false);
-  props.updateSortInfo();
+  props.saveNowSortInfo();
 }
 </script>
 <style scoped>
