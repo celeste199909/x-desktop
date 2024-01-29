@@ -1,14 +1,10 @@
 // const { readdir, realpathSync } = require("fs");
 const { ipcRenderer } = require("electron");
 
-// functions
-require("./modules/functions");
 // 桌面
 require("./modules/desktop");
 // steam
 require("./modules/steam");
-// chrome
-require("./modules/browser");
 
 window.winId = "";
 

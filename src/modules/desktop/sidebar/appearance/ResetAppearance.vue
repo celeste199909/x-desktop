@@ -1,8 +1,8 @@
 <template>
   <div class="item w-full my-4">
     <div class="mb-4 font-bold">重置外观设置</div>
-    <div class="my-2 text-red-400" @click="resetDesktopAppearance">
-      重置（需要重启才生效）
+    <div class="my-2 text-red-400 cursor-pointer" @click="resetDesktopAppearance">
+      重置（重启生效）
     </div>
   </div>
 </template>
@@ -10,6 +10,7 @@
 <script setup>
 import { onMounted, defineProps, ref  } from "vue";
 import { getDesktopAppearance, defaultDesktopAppearance } from "@/functions/desktop/desktopAppearance";
+import showToast from "@/components/toast/index";
 
 const props = defineProps({
   setDesktopAppearance: {
@@ -21,7 +22,7 @@ function resetDesktopAppearance() {
   props.setDesktopAppearance({
     ...defaultDesktopAppearance
   });
-  console.log('%c [ 重置外观设置 ]-22', 'font-size:13px; background:skyblue; color:white;', getDesktopAppearance())
+  showToast("重置成功，重启生效");
 }
 </script>
 <style scoped></style>

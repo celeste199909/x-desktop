@@ -8,7 +8,7 @@
     <template v-for="mo in modulesList" :key="mo.name">
       <div
         v-if="mo.active"
-        class="w-[40px] h-[40px] p-[6px] overflow-hidden rounded-full cursor-pointer flex justify-center items-center"
+        class="w-[46px] h-[46px] p-[6px] overflow-hidden rounded-full cursor-pointer flex justify-center items-center"
         @click="handleSwitchExpand(mo.name)"
       >
         <img
@@ -76,7 +76,7 @@ function handleSwitchExpand(moduleName) {
 }
 
 const getAssetsIcon = (name) => {
-  return new URL(`/src/assets/icons/${name}`, import.meta.url).href;
+  return new URL(`/src/assets/icons/${name}.png`, import.meta.url).href;
 };
 </script>
 <style scoped></style>

@@ -127,6 +127,11 @@ function resetBg() {
   localBgImage.value.forEach((item) => {
     item.current = false;
   });
+  props.setDesktopAppearance({
+    bgColor: bgColor.value,
+    bgImage: bgImage.value,
+    localBgImage: localBgImage.value,
+  });
 }
 
 // 上传图片背景

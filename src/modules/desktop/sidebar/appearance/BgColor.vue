@@ -85,6 +85,11 @@ function resetBg() {
   localBgImage.value.forEach((item) => {
     item.current = false;
   });
+  props.setDesktopAppearance({
+    bgColor: bgColor.value,
+    bgImage: bgImage.value,
+    localBgImage: localBgImage.value,
+  });
 }
 </script>
 <style scoped></style>

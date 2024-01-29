@@ -77,6 +77,7 @@ import showToast from "@/components/toast/index";
 import { nanoid } from "nanoid";
 import { VueDraggable } from "vue-draggable-plus";
 import { getDesktopFunction } from "@/functions/desktop/desktopFunction";
+import {getSearchKeywords} from "@/functions/desktop/handleRawIcons";
 
 const props = defineProps({
   setDesktopFunction: {
@@ -133,13 +134,16 @@ function handleAddPath() {
     return;
   }
 
+  const pathName = _.last(newPath.split("\\"));
+
   const p = {
     id: nanoid(),
-    name: _.last(newPath.split("\\")),
+    name: pathName,
     path: newPath,
     active: false,
     isFolded: false,
     sortInfo: [],
+    searchKeywords: getSearchKeywords(pathName),
   };
 
   iconPaths.value.push(p);

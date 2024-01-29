@@ -29,15 +29,19 @@
     >
       <div class="text-center">
         <div
-          class="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition-all duration-500 ease-in-out active:scale-105"
+          class="cursor-pointer bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition-all duration-500 ease-in-out active:scale-105"
           @click="setSteamRootPath"
         >
           选择 Steam 目录
         </div>
-        <div
-          class="text-[14px] text-slate-400 mt-2 cursor-pointer hover:text-slate-100 hover:font-bold"
-        >
-          如何找到我的 Steam 目录？
+        <div class="text-[14px] text-slate-400 mt-2">
+          <div>tip:电脑桌面右键steam图标->属性</div>
+          <div
+            class="hover:text-slate-100 cursor-pointer underline"
+            @click="handleHowToFindSteamPath"
+          >
+            详细说明
+          </div>
         </div>
       </div>
     </div>
@@ -111,6 +115,12 @@ function openSteamApp(steamApp, event) {
   window.hideDesk();
 }
 
+// 浏览器打开链接
+function handleHowToFindSteamPath() {
+  utools.shellOpenExternal("https://sourl.cn/dgwfig");
+  window.hideDesk();
+}
+
 const getLocalImage = (path) => {
   return new URL(path, import.meta.url).href;
 };
@@ -119,6 +129,7 @@ const getLocalImage = (path) => {
 <style scoped>
 #steam {
   background: radial-gradient(circle at center, #3a475f 0%, #161a1f 100%);
+  /* cursor:  url('@/assets/icons/cursor.png') 10 10, auto; */
 }
 .card {
   background-image: linear-gradient(163deg, #946bfa 0%, #4576ff 100%);

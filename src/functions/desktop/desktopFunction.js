@@ -12,6 +12,7 @@ const defaultDesktopFunction = {
             active: true,
             isFolded: false,
             sortInfo: [],
+            searchKeywords:["桌面", "zhuomian", "zm"],
         }
     ]
 }

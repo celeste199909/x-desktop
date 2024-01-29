@@ -1,15 +1,23 @@
 <template>
   <div
     class="xfolder flex flex-col items-center justify-center overflow-hidden"
+    :class="[
+      isOnQuickSearchMode
+        ? xfolder.isSearchTarget
+          ? 'is-search-target'
+          : 'not-search-target'
+        : '',
+      isOnQuickSearchMode ? (xfolder.isSelected ? 'is-selected' : '') : '',
+    ]"
     :style="{
       width: layout.cellLength + 'px',
       height: layout.cellLength + 'px',
     }"
     @click="expandFolder"
   >
-    <div class="xfolder-wrapper">
+    <div class="xfolder-wrapper border border-slate-500">
       <template v-for="item in xfolder.icons" :key="item.id">
-        <img :src="item.iconImage" />
+        <img class="p-1" :src="item.iconImage" />
       </template>
     </div>
     <div class="xfolder-name">{{ xfolder.name }}</div>
@@ -22,11 +30,12 @@
       class="expand-xfolder w-screen h-screen bg-black/0 fixed top-0 left-0 flex justify-center items-center z-[300]"
     >
       <VueDraggable
-        class="rounded-xl p-4 border border-slate-700 bg-black/20"
+        class="rounded-xl p-4 border border-slate-500 bg-black/20 overflow-y-scroll overflow-x-hidden"
         :animation="150"
         ghostClass="ghost"
         v-model="xfolder.icons"
         :style="gridStyle"
+        @end="onEnd"
       >
         <div cl v-for="item in xfolder.icons" :key="item.id" class="icon">
           <Application
@@ -54,6 +63,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  saveNowSortInfo: {
+    type: Function,
+    required: true,
+  },
 });
 
 const isContract = ref(true);
@@ -62,8 +75,8 @@ const isExpandXFolder = inject("isExpandXFolder");
 
 // app容器 grid 布局
 const gridStyle = ref({
-  minWidth: layout.value.minWidth + "px",
-  minHeight: layout.value.minHeight + "px",
+  width: layout.value.minWidth + "px",
+  height: layout.value.minHeight + "px",
   display: "grid",
   gridTemplateColumns: `repeat(${layout.value.column}, 1fr)`,
   gridTemplateRows: `repeat(${layout.value.row}, 1fr)`,
@@ -79,15 +92,22 @@ function contractXFolder() {
   isContract.value = true;
   isExpandXFolder.value = false;
 }
+
+function onEnd() {
+  props.saveNowSortInfo();
+}
+
 </script>
 <style scoped>
+/* 定义滚动条的样式 */
+
 .xfolder {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
   user-select: none;
-  border: 3px solid #00000000;
+  border: 2px solid #00000000;
   transition: all 0.3s;
   padding: 10px;
 }
@@ -100,7 +120,6 @@ function contractXFolder() {
   height: 50%;
   margin: 10px;
   padding: 2px;
-  border: 1px solid #eeeeee;
   border-radius: 10px;
   overflow: hidden;
   display: grid;
@@ -119,5 +138,22 @@ function contractXFolder() {
 }
 .icon.ghost {
   opacity: 0;
+}
+
+/* 搜索和选择 */
+.xfolder.is-search-target {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  border: 2px solid #eeeeee86;
+  backdrop-filter: blur(10px);
+}
+.xfolder.is-search-target.is-selected {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  border: 2px solid rgb(39, 140, 255);
+  backdrop-filter: blur(10px);
+}
+.xfolder.not-search-target {
+  opacity: 0.6;
 }
 </style>

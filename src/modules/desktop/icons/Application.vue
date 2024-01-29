@@ -71,7 +71,7 @@ function handleMouseUp(icon, event) {
   justify-content: flex-start;
   align-items: center;
   user-select: none;
-  border: 3px solid #00000000;
+  border: 2px solid #00000000;
   transition: all 0.3s;
   padding: 10px;
 }
@@ -113,13 +113,13 @@ function handleMouseUp(icon, event) {
 .icon.is-search-target {
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: 12px;
-  border: 3px solid #eeeeee86;
+  border: 2px solid #eeeeee86;
   backdrop-filter: blur(10px);
 }
 .icon.is-search-target.is-selected {
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: 12px;
-  border: 3px solid rgb(39, 140, 255);
+  border: 2px solid rgb(39, 140, 255);
   backdrop-filter: blur(10px);
 }
 .icon.not-search-target {

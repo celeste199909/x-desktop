@@ -9,6 +9,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref, defineProps, defineEmits,computed } from "vue";
 // 组合式函数
+// import { useSelectSearchTarget } from "@/modules/desktop/composables/selectSearchTarget.js";
 
 const props = defineProps({
   pagedIcons: {
@@ -33,7 +34,7 @@ const emit = defineEmits(["setIsOnQuickSearchMode"]);
 
 const inputText = ref("");
 let timer = ref(null);
-
+// const { selectFirstTarget } = useSelectSearchTarget(props.pagedIcons, props.currentPage, props.moveToPage, props.isOnQuickSearchMode, timer);
 // 监听键盘事件
 function quickSearch(event) {
   const keyCode = event.keyCode || event.which;

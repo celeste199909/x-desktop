@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { inject, ref, onBeforeMount, provide  } from "vue";
+import { inject, ref, onBeforeMount, provide } from "vue";
 // 组件
 import Page from "@/modules/desktop/widgets/Page.vue";
 import PageIndicator from "@/modules/desktop/widgets/PageIndicator.vue";
@@ -75,9 +75,6 @@ import ContextMenu from "@/modules/desktop/contextmenu/ContextMenu.vue";
 // 组合式函数
 import { useWheelToPage } from "@/modules/desktop/composables/wheelToPage.js";
 import { useMoveToPage } from "@/modules/desktop/composables/moveToPage.js";
-import { watchDeep } from "@vueuse/core";
-// 参数：pagedIcons, setDesktopSortInfo
-import { useUpdateSortInfo } from "@/modules/desktop/composables/updateSortInfo.js";
 // 工具
 import {
   getDesktopAppearance,
@@ -90,7 +87,6 @@ import { handleRawIcons } from "@/functions/desktop/handleRawIcons";
 // showToast
 import showToast from "@/components/toast/index";
 import _ from "lodash";
-import { nanoid } from "nanoid";
 
 // 来自 App.vue
 const currentModule = inject("currentModule");
@@ -142,7 +138,18 @@ function paginateIcons(icons) {
       let page = [];
       pageSortInfo.forEach((iconSortInfo) => {
         if (iconSortInfo.type === "xfolder") {
+          // 根据 sortInfo 对 xfolder 中的图标进行排序
+          const xfolderSortInfo = iconSortInfo.sortInfo;
+          const xfolderIcons = [];
+          xfolderSortInfo.forEach((iconSortInfo) => {
+            const pathId = iconSortInfo.fromPathId;
+            const icon = _icons[pathId].find((icon) => {
+              return icon.rawName === iconSortInfo.rawName;
+            });
+            xfolderIcons.push(icon);
+          });
           const pathId = iconSortInfo.id;
+          // make xfolder
           const xfolder = {
             type: "xfolder",
             id: pathId,
@@ -150,7 +157,8 @@ function paginateIcons(icons) {
             path: iconSortInfo.path,
             isFolded: true,
             sortInfo: iconSortInfo.sortInfo,
-            icons: _icons[pathId],
+            icons: xfolderIcons,
+            searchKeywords: iconSortInfo.searchKeywords,
           };
           page.push(xfolder);
         } else {
@@ -177,6 +185,7 @@ function paginateIcons(icons) {
       if (!isActive) return;
       // 如果路径被收纳，则创建文件夹
       if (isFolded) {
+        // make xfolder
         const xfolder = {
           type: "xfolder",
           id: path.id,
@@ -185,6 +194,7 @@ function paginateIcons(icons) {
           isFolded: true,
           sortInfo: path.sortInfo,
           icons: thePathIcons,
+          searchKeywords: path.searchKeywords,
         };
         if (page.length < pageSize) {
           page.push(xfolder);
@@ -288,6 +298,7 @@ async function activePath(path) {
   const _handledIcons = [...handledIcons];
   const isFolded = path.isFolded;
   if (isFolded) {
+    // make xfolder
     const xfolder = {
       type: "xfolder",
       id: path.id,
@@ -296,6 +307,7 @@ async function activePath(path) {
       isFolded: true,
       sortInfo: path.sortInfo,
       icons: _handledIcons,
+      searchKeywords: path.searchKeywords,
     };
     let currentPage = pagedIcons.value.length - 1;
     if (pagedIcons.value[currentPage].length < pageSize) {
@@ -359,6 +371,7 @@ function inactivePath(path) {
   pagedIcons.value = pagedIcons.value.filter((page) => {
     return page.length > 0;
   });
+
   // 如果当前页是最后一页，则切换至前一页
   if (currentPage.value === pagedIcons.value.length) {
     moveToPage({ pageIndex: currentPage.value - 1, transition: true });
@@ -402,6 +415,7 @@ function foldPath(path) {
   });
 
   // 新建文件夹，添加到 pagedIcons 中
+  // make xfolder
   const xfolder = {
     type: "xfolder",
     id: path.id,
@@ -410,22 +424,31 @@ function foldPath(path) {
     isFolded: false,
     sortInfo: path.sortInfo,
     icons: thePathIcons,
+    searchKeywords: path.searchKeywords,
   };
   const pageSize = getDesktopLayout().pageSize;
-  let currentPage = pagedIcons.value.length - 1;
+  let _currentPage = pagedIcons.value.length - 1;
 
-  if (pagedIcons.value[currentPage].length < pageSize) {
-    pagedIcons.value[currentPage].push(xfolder);
+  if (pagedIcons.value[_currentPage].length < pageSize) {
+    pagedIcons.value[_currentPage].push(xfolder);
   } else {
     pagedIcons.value.push([]);
-    currentPage++;
-    pagedIcons.value[currentPage].push(xfolder);
-    moveToPage({ pageIndex: currentPage });
+    _currentPage++;
+    pagedIcons.value[_currentPage].push(xfolder);
+    moveToPage({ pageIndex: _currentPage });
   }
   // 把 iocnPaths 中的路径isFolded设置为 true
   const iconPaths = getDesktopFunction().iconPaths;
   const index = _.findIndex(iconPaths, { id: pathId });
   iconPaths[index].isFolded = true;
+  // 如果有空页面，则删除
+  pagedIcons.value = pagedIcons.value.filter((page) => {
+    return page.length > 0;
+  });
+  // 如果当前页是最后一页，则切换至前一页
+  if (currentPage.value === pagedIcons.value.length) {
+    moveToPage({ pageIndex: currentPage.value - 1, transition: true });
+  }
   setDesktopFunction({ iconPaths: iconPaths });
 
   console.log(
@@ -542,14 +565,24 @@ function saveNowSortInfo() {
     page.forEach((obj) => {
       let iconSortInfo = {};
       if (obj.type === "xfolder") {
+        const xfolderSortInfo = [];
+        obj.icons.forEach((icon) => {
+          xfolderSortInfo.push({
+            type: "icon",
+            rawName: icon.rawName,
+            fromPathId: icon.fromPathId,
+          });
+        });
+        // make xfolder
         iconSortInfo = {
           type: "xfolder",
           id: obj.id,
           name: obj.name,
           path: obj.path,
           isFolded: obj.isFolded,
-          sortInfo: obj.sortInfo,
+          sortInfo: xfolderSortInfo,
           // icons: obj.icons,
+          searchKeywords: obj.searchKeywords,
         };
       } else {
         iconSortInfo = {
@@ -574,7 +607,7 @@ function setCurrentPage(value) {
 }
 
 // 添加页面
-function addPage(){
+function addPage() {
   const newPage = [];
   pagedIcons.value.push(newPage);
   moveToPage({ pageIndex: currentPage.value, transition: false });
@@ -604,7 +637,13 @@ function removePage() {
 
 // 翻页功能
 const { moveToPage } = useMoveToPage(pagedIcons, setCurrentPage);
-useWheelToPage(currentModule, pagedIcons, currentPage, moveToPage, isExpandXFolder); // 滚轮翻页
+useWheelToPage(
+  currentModule,
+  pagedIcons,
+  currentPage,
+  moveToPage,
+  isExpandXFolder
+); // 滚轮翻页
 
 // 右键菜单显隐
 const isShowContextMenu = ref(false); // 右键菜单 emit: showContextMenu

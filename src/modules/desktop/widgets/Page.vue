@@ -28,6 +28,7 @@
           v-if="item.type === 'xfolder'"
           :xfolder="item"
           :isOnQuickSearchMode="isOnQuickSearchMode"
+          :saveNowSortInfo="saveNowSortInfo"
         />
         <Application
           v-else

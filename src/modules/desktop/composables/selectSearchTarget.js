@@ -8,7 +8,7 @@ export function useSelectSearchTarget(pagedIcons, currentPage, moveToPage, isOnQ
   const selectedTargetIndex = ref(0);
   const searchTargetList = computed(() => {
     let list = [];
-    pagedIcons.forEach((page) => {
+    pagedIcons.value.forEach((page) => {
       page.forEach((item) => {
         if (item.isSearchTarget) {
           list.push(item);

@@ -25,21 +25,21 @@ import _ from "lodash";
 const modulesList = ref([
   {
     name: "desktop",
-    icon: "desktop.png",
+    icon: "desktop",
     title: "桌面",
     component: Desktop,
     active: true,
   },
   {
     name: "steam",
-    icon: "steam.png",
+    icon: "steam",
     title: "Steam",
     component: Steam,
     active: true,
   },
   // {
   //   name: "browser",
-  //   icon: "chrome.png",
+  //   icon: "chrome",
   //   title: "浏览器",
   //   component: Browser,
   //   active: true,
