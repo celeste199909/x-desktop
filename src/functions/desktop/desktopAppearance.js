@@ -38,7 +38,7 @@ const defaultDesktopAppearance = {
             id: "OkgUomwDmg",
             color: ["rgb(20, 30, 48)", "rgb(36, 59, 85)"],
             direction: "to right",
-            current: false,
+            current: true,
         },
         {
             id: "3ayt51",
@@ -74,7 +74,7 @@ const defaultDesktopAppearance = {
     bgImage: [
         {
             id: "tzXza8DeoDs",
-            current: true,
+            current: false,
             name: "mountains.jpg",
         },
         {

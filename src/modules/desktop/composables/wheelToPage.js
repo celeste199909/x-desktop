@@ -1,4 +1,4 @@
-import { onMounted } from "vue";
+import { onMounted, inject } from "vue";
 
 
 /**
@@ -9,13 +9,21 @@ import { onMounted } from "vue";
  * @param {Function} moveToPage 切换页面方法
  * @return {*}
  */
-export function useWheelToPage(currentModule, pagedIcons, currentPage, moveToPage ) {
+export function useWheelToPage(currentModule, pagedIcons, currentPage, moveToPage, isExpandXFolder ) {
+    const isShowSetting = inject("isShowSetting");
+    // const isExpandXFolder = inject("isExpandXFolder");
 
     onMounted(() => {
         document.addEventListener("wheel", wheelToPage);
     });
 
     function wheelToPage(e) {
+        if (isShowSetting.value) {
+            return;
+        }
+        if (isExpandXFolder.value) {
+            return;
+        }
         if (currentModule.value !== "desktop") {
             return;
         }

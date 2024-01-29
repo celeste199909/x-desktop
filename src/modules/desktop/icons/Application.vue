@@ -77,10 +77,14 @@ function handleMouseUp(icon, event) {
 }
 .xfolder .icon {
   /* 文件夹中 */
-  width: 100% !important;
-  height: 100% !important;
+  width: 20px !important;
+  height: 20px !important;
   overflow: hidden;
   padding: 0;
+}
+/* 展开的文件夹中 */
+.expand-xfolder .icon {
+  color: #fff;
 }
 .icon .icon-image {
   width: 50%;

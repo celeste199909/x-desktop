@@ -6,7 +6,7 @@
       left: contextMenuPosition.x + 'px',
       top: contextMenuPosition.y + 'px',
     }"
-    class="context-menu select-none px-2 py-3 rounded-lg backdrop-blur-sm bg-slate-200/90 dark:bg-slate-900/90 fixed w-40 z-100"
+    class="context-menu select-none px-2 py-3 rounded-lg backdrop-blur-sm bg-slate-200/90 dark:bg-slate-900/90 fixed w-40 z-[400]"
   >
     <!-- 桌面菜单 -->
     <template v-for="item in menuOptions" :key="item.name">
@@ -73,6 +73,8 @@ const emit = defineEmits(["showContextMenu", "showSidebar"]);
 const clickTarget = ref(null); // 点击的目标
 const contextMenuPosition = ref({ x: 0, y: 0 }); // 右键菜单位置
 const { globalContextMenuOptions } = useGlobalContextMenu(); // 全局右键菜单项
+const isShowSetting = inject("isShowSetting");
+const isExpandXFolder = inject("isExpandXFolder");
 
 const clickTargetType = computed(() => {
   if (!clickTarget.value) return null;
@@ -124,11 +126,16 @@ const menuOptions = ref([
 
 // 监听鼠标右键
 window.addEventListener("contextmenu", (event) => {
+  if(isExpandXFolder.value) return;
+
+  if (isShowSetting.value) return;
   event.preventDefault();
   clickTarget.value = event.target;
   contextMenuPosition.value.x = event.clientX;
   contextMenuPosition.value.y = event.clientY;
   emit("showContextMenu", true);
+  console.log('%c [ clickTarget.value ]-129', 'font-size:13px; background:pink; color:#bf2c9f;', clickTarget.value)
+
 });
 
 // 监听点击空白处 隐藏右键菜单 和 设置窗口
@@ -152,10 +159,13 @@ function openApp(event) {
   const result = clickTarget.value.id.match(pattern);
 
   const iconId = result[1];
+  console.log('%c [ iconId ]-160', 'font-size:13px; background:pink; color:#bf2c9f;', iconId)
   const icon = props.pagedIcons[props.currentPage].find(
     (item) => item.id === iconId
   );
 
+
+  console.log('%c [ icon ]-166', 'font-size:13px; background:pink; color:#bf2c9f;', icon)
   if (!icon) return;
   utools.shellOpenPath(icon.realPath);
   window.hideDesk();

@@ -20,6 +20,7 @@
     >
       <div
         v-for="item in pagedIcons[pageIndex]"
+        v-show="!isExpandXFolder"
         :key="item.id"
         class="draggable"
       >
@@ -39,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from "vue";
+import { ref, defineProps, defineEmits, inject } from "vue";
 import { VueDraggable } from "vue-draggable-plus";
 import Application from "@/modules/desktop/icons/Application.vue";
 import Xfolder from "@/modules/desktop/icons/Xfolder.vue";
@@ -84,6 +85,8 @@ const emit = defineEmits(["setCurrentPage", "setIsDragging"]);
 // 注入 来自 App.vue
 const layout = ref(getDesktopLayout());
 // const pageIcons = ref(props.pagedIcons[props.pageIndex]);
+// 来自 desktop
+const isExpandXFolder = inject("isExpandXFolder");
 
 // app容器 grid 布局
 const gridStyle = ref({

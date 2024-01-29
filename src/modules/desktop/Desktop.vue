@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { inject, ref, onBeforeMount } from "vue";
+import { inject, ref, onBeforeMount, provide  } from "vue";
 // 组件
 import Page from "@/modules/desktop/widgets/Page.vue";
 import PageIndicator from "@/modules/desktop/widgets/PageIndicator.vue";
@@ -96,6 +96,8 @@ import { nanoid } from "nanoid";
 const currentModule = inject("currentModule");
 const icons = ref({});
 const pagedIcons = ref([]);
+const isExpandXFolder = ref(false);
+provide("isExpandXFolder", isExpandXFolder);
 
 onBeforeMount(() => {
   init();
@@ -602,7 +604,7 @@ function removePage() {
 
 // 翻页功能
 const { moveToPage } = useMoveToPage(pagedIcons, setCurrentPage);
-useWheelToPage(currentModule, pagedIcons, currentPage, moveToPage); // 滚轮翻页
+useWheelToPage(currentModule, pagedIcons, currentPage, moveToPage, isExpandXFolder); // 滚轮翻页
 
 // 右键菜单显隐
 const isShowContextMenu = ref(false); // 右键菜单 emit: showContextMenu
