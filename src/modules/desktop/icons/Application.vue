@@ -15,9 +15,9 @@
     }"
   >
     <img
-      class="icon-image"
+      class="icon-image rounded-xl"
       :id="`icon-image-${icon.id}`"
-      :src="icon.iconImage"
+      :src="getHDAppIcon(icon)"
       alt=""
       srcset=""
       ref="iconImage"
@@ -31,6 +31,7 @@
 <script setup>
 import { defineProps, inject, ref, computed } from "vue";
 import { getDesktopLayout } from "../../../functions/desktop/desktopAppearance";
+import { getHDIconImage } from "@/modules/desktop/storage/iconImages";
 
 const props = defineProps({
   icon: {
@@ -63,6 +64,18 @@ function handleMouseUp(icon, event) {
     window.hideDesk();
   }
 }
+
+const getHDAppIcon = (icon) => {
+  const iconImage = getHDIconImage(icon.showName);
+  if (iconImage) {
+    return new URL(`/src/assets/apps/${iconImage}.png`, import.meta.url).href;
+  } else if(icon.isDirectory) {
+    return new URL(`/src/assets/apps/folder.png`, import.meta.url).href;
+  } 
+  else {
+    return icon.iconImage;
+  }
+};
 </script>
 <style scoped>
 .icon {
@@ -131,6 +144,21 @@ function handleMouseUp(icon, event) {
 
 .icon-image:hover {
   filter: drop-shadow(0 0 0.5rem rgba(206, 206, 206, 0.438));
+  /* animation: icon-image-hover 0.3s ease-in-out forwards; */
 }
-
+.icon-image:active {
+  /* filter: drop-shadow(0 0 0.5rem rgba(206, 206, 206, 0.438)); */
+  animation: icon-image-hover 0.6s ease-in-out forwards;
+}
+@keyframes icon-image-hover {
+  0% {
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 </style>

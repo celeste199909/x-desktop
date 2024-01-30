@@ -101,14 +101,16 @@ onBeforeMount(() => {
 
 async function init() {
   const allIcons = await loadAllIcons();
-  icons.value = allIcons;
+  icons.value = _.cloneDeep(allIcons);
   console.log(
     "%c [ 初始化 所有图标 ]-93",
     "font-size:13px;  background:green; color:white;",
-    icons.value
+    allIcons
   );
-  const paged = paginateIcons(allIcons);
+  const paged = paginateIcons(_.cloneDeep(allIcons));
   pagedIcons.value = paged;
+  // // 保存排序信息
+  // saveNowSortInfo();
   console.log(
     "%c [ 初始化 分页图标 ]-113",
     "font-size:13px; background:green; color:white;",
@@ -125,18 +127,20 @@ function paginateIcons(icons) {
   const pageSize = getDesktopLayout().pageSize;
   // 排序信息
   const sortInfo = getDesktopSortInfo();
-  console.log(
-    "%c [ 开始排序分页 ]-125",
-    "font-size:13px; background:pink; color:#bf2c9f;",
-    sortInfo
-  );
+  // console.log(
+  //   "%c [ 开始排序分页 ]-125",
+  //   "font-size:13px; background:pink; color:#bf2c9f;",
+  //   sortInfo
+  // );
   let _icons = { ...icons };
   // 如果有排序信息，则按照排序信息排序
   if (sortInfo.length > 0) {
     let pages = [];
+    // 根据 sortInfo 对页面进行排序
     sortInfo.forEach((pageSortInfo) => {
       let page = [];
       pageSortInfo.forEach((iconSortInfo) => {
+
         if (iconSortInfo.type === "xfolder") {
           // 根据 sortInfo 对 xfolder 中的图标进行排序
           const xfolderSortInfo = iconSortInfo.sortInfo;
@@ -146,7 +150,11 @@ function paginateIcons(icons) {
             const icon = _icons[pathId].find((icon) => {
               return icon.rawName === iconSortInfo.rawName;
             });
-            xfolderIcons.push(icon);
+            if (icon) xfolderIcons.push(icon);
+            // 从 _icons 中删除该图标
+            const index = _.findIndex(_icons[pathId], { rawName: iconSortInfo.rawName });
+            _icons[pathId].splice(index, 1);
+
           });
           const pathId = iconSortInfo.id;
           // make xfolder
@@ -166,11 +174,36 @@ function paginateIcons(icons) {
           const icon = _icons[pathId].find((icon) => {
             return icon.rawName === iconSortInfo.rawName;
           });
-          page.push(icon);
+          if (icon){
+            page.push(icon);
+            // 从 _icons 中删除该图标
+            const index = _.findIndex(_icons[pathId], { rawName: iconSortInfo.rawName });
+            _icons[pathId].splice(index, 1);
+
+          }
         }
       });
       pages.push(page);
     });
+    // 把所有剩余的图标放到一个数组中
+    let _iconsArr = [];
+    for (const key in _icons) {
+      _iconsArr = [..._iconsArr, ..._icons[key]];
+    }
+    console.log('%c [ 剩余图标_iconsArr ]-189', 'font-size:13px; background:pink; color:#bf2c9f;', _iconsArr)
+    // 将剩余的图标添加到最后有空位的页面
+    _iconsArr.forEach((icon) => {
+      let currentPage = pages.length - 1;
+      if (pages[currentPage].length < pageSize) {
+        pages[currentPage].push(icon);
+      } else {
+        pages.push([]);
+        currentPage++;
+        pages[currentPage].push(icon);
+      }
+    });
+    
+    // 返回 pages
     return pages;
   } else {
     // 如果没有排序信息

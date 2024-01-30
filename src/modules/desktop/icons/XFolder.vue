@@ -24,27 +24,29 @@
   </div>
   <!-- 展开的 xfolder -->
   <Teleport to="body" :disabled="isContract">
-    <div
-      @click.self="contractXFolder"
-      v-show="!isContract"
-      class="expand-xfolder w-screen h-screen bg-black/0 fixed top-0 left-0 flex justify-center items-center z-[300]"
-    >
-      <VueDraggable
-        class="rounded-xl p-4 border border-slate-500 bg-black/20 overflow-y-scroll overflow-x-hidden"
-        :animation="150"
-        ghostClass="ghost"
-        v-model="xfolder.icons"
-        :style="gridStyle"
-        @end="onEnd"
+    <Transition>
+      <div
+        @click.self="contractXFolder"
+        v-show="!isContract"
+        class="expand-xfolder w-screen h-screen bg-black/0 fixed top-0 left-0 flex justify-center items-center z-[300]"
       >
-        <div cl v-for="item in xfolder.icons" :key="item.id" class="icon">
-          <Application
-            :icon="item"
-            :isOnQuickSearchMode="isOnQuickSearchMode"
-          />
-        </div>
-      </VueDraggable>
-    </div>
+        <VueDraggable
+          class="rounded-xl p-4 border border-slate-500 bg-black/20 overflow-y-scroll overflow-x-hidden"
+          :animation="150"
+          ghostClass="ghost"
+          v-model="xfolder.icons"
+          :style="gridStyle"
+          @end="onEnd"
+        >
+          <div cl v-for="item in xfolder.icons" :key="item.id" class="icon">
+            <Application
+              :icon="item"
+              :isOnQuickSearchMode="isOnQuickSearchMode"
+            />
+          </div>
+        </VueDraggable>
+      </div>
+    </Transition>
   </Teleport>
 </template>
 
@@ -96,7 +98,6 @@ function contractXFolder() {
 function onEnd() {
   props.saveNowSortInfo();
 }
-
 </script>
 <style scoped>
 /* 定义滚动条的样式 */
@@ -155,5 +156,21 @@ function onEnd() {
 }
 .xfolder.not-search-target {
   opacity: 0.6;
+}
+
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+
+.v-leave-from,
+.v-enter-to {
+  opacity: 1;
 }
 </style>

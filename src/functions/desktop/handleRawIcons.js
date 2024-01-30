@@ -17,18 +17,22 @@ export function handleRawIcons(rawIcons) {
     const showName = getShowName(rawIcon.rawName);
     // 返回的图标数据样例
     let icon = {
-      rawName: rawIcon.rawName,
-      iconImage: rawIcon.iconImage,
-      realPath: rawIcon.realPath,
+      // rawName: rawIcon.rawName,
+      // iconImage: rawIcon.iconImage,
+      // realPath: rawIcon.realPath,
       // 以下为增加的属性
       type: getIconType(rawIcon.rawName),
       id: nanoid(),
       showName: showName,
       suffix: rawIcon.rawName.split(".").pop(),
       searchKeywords: getSearchKeywords(showName),
-      fromPath: rawIcon.fromPath,
-      fromPathId: rawIcon.fromPathId,
-      fromPathName: rawIcon.fromPathName
+      ...rawIcon
+      // fromPath: rawIcon.fromPath,
+      // fromPathId: rawIcon.fromPathId,
+      // fromPathName: rawIcon.fromPathName,
+      // isDirectory: rawIcon.isDirectory,
+      // isFile: res.isFile,
+      // fileContent: rawIcon.fileContent,
     };
     handledIcons.push(icon);
   });

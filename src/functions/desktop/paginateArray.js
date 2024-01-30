@@ -28,14 +28,8 @@ const paginateArray = function (desktopIcons) {
 
     const iconPaths = getDesktopFunction().iconPaths;
     const sortInfo = getDesktopSortInfo();
-    const allPathsSortInfo = sortInfo.allPathsSortInfo;
     const pagedIconsSortInfo = sortInfo.pagedIconsSortInfo;
     const pageSize = getDesktopLayout().pageSize;
-
-
-    // console.log("开始分页排序,要排序的图标1：", desktopIcons);
-    // console.log("路径信息：", iconPaths);
-
 
     // 过滤，只保留激活的路径下的图标
     const _desktopIcons = desktopIcons.filter((icon) => {
@@ -69,7 +63,7 @@ const paginateArray = function (desktopIcons) {
                 const icon = _desktopIcons.find((item) => item.rawName === rawName);
                 // // 图标可能已经被删除
                 if (!icon) {
-                    // console.log("图标已经被删除, rawName);
+                    console.log("图标已经被删除", rawName);
                     return;
                 } else {
                     // page.push(icon);

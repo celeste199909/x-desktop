@@ -1,8 +1,8 @@
 // desktop.js 提供桌面相关的方法
 
-const { readdir, realpathSync } = require("fs");
+const { readdir, realpathSync, readFileSync, statSync } = require("fs");
 const { ipcRenderer, shell } = require("electron");
-
+// const windowsShortcuts = require('windows-shortcuts');
 // 通过单个路径获取图标信息
 // path: {
 //   id:"desktop",
@@ -25,14 +25,21 @@ window.getIconsByPath = function (path) {
       files.forEach((file) => {
         // 或者快捷方式的真正路径
         const realPath = realpathSync(iconPath + "/" + file);
-
+        // 读取文件
+        const res = statSync(realPath)
+        // desktop.ini
+        if (file === "desktop.ini") return;
+   
         desktopIcons.push({
           rawName: file,
           iconImage: utools.getFileIcon(realPath),
           realPath: realPath,
           fromPath: iconPath,
           fromPathId: pathId,
-          fromPathName: pathName
+          fromPathName: pathName,
+          isDirectory: res.isDirectory(),
+          isFile: res.isFile(),
+          fileContent: "",
         });
 
       });

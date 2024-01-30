@@ -9,6 +9,7 @@
       <div
         v-if="mo.active"
         class="w-[46px] h-[46px] p-[6px] overflow-hidden rounded-full cursor-pointer flex justify-center items-center"
+        :style="mo.name === 'desktop' ? 'padding: 6px' : 'padding: 4px'"
         @click="handleSwitchExpand(mo.name)"
       >
         <img
