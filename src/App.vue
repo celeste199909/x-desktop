@@ -31,19 +31,19 @@ const modulesList = ref([
     active: true,
   },
   {
+    name: "browser",
+    icon: "browser",
+    title: "浏览器",
+    component: Browser,
+    active: true,
+  },
+  {
     name: "steam",
     icon: "steam",
     title: "Steam",
     component: Steam,
     active: true,
   },
-  // {
-  //   name: "browser",
-  //   icon: "chrome",
-  //   title: "浏览器",
-  //   component: Browser,
-  //   active: true,
-  // },
 ]);
 provide("modulesList", modulesList); // 模块
 

@@ -142,6 +142,10 @@ function paginateIcons(icons) {
       pageSortInfo.forEach((iconSortInfo) => {
 
         if (iconSortInfo.type === "xfolder") {
+          // 判断 xfolder 是否还存在
+          const thePathIcons = _icons[iconSortInfo.id];
+          if (!thePathIcons) return;
+
           // 根据 sortInfo 对 xfolder 中的图标进行排序
           const xfolderSortInfo = iconSortInfo.sortInfo;
           const xfolderIcons = [];
@@ -266,16 +270,23 @@ async function loadAllIcons() {
     for (let i = 0; i < iconPaths.length; i++) {
       const path = iconPaths[i];
       const handledIcons = await loadIcons(path);
-      icons[path.id] = handledIcons;
+      if (handledIcons) {
+        icons[path.id] = handledIcons;
+      }
+      // icons[path.id] = handledIcons;
     }
     resolve(icons);
   });
 }
 
 async function loadIcons(path) {
-  const rawIcons = await window.getIconsByPath(path);
-  const handledIcons = handleRawIcons(rawIcons);
-  return handledIcons;
+  try {
+    const rawIcons = await window.getIconsByPath(path);
+    const handledIcons = handleRawIcons(rawIcons);
+    return handledIcons;
+  }catch (e) {
+    console.log('%c [ loadIcons ]-233', 'font-size:13px; background:pink; color:#bf2c9f;', e)
+  }
 }
 
 // 添加路径
@@ -540,6 +551,7 @@ function unfoldPath(path) {
   );
   saveNowSortInfo();
 }
+
 // --- 桌面外观
 function setDesktopAppearance(updateObj) {
   const newDesktopAppearance = {
@@ -550,11 +562,11 @@ function setDesktopAppearance(updateObj) {
     "desktopAppearance",
     JSON.parse(JSON.stringify(newDesktopAppearance))
   );
-  console.log(
-    "%c [ 桌面外观设置更新, 已保存至本地 ]-166",
-    "font-size:13px; background:blue; color:white;",
-    getDesktopAppearance()
-  );
+  // console.log(
+  //   "%c [ 桌面外观设置更新, 已保存至本地 ]-166",
+  //   "font-size:13px; background:blue; color:white;",
+  //   getDesktopAppearance()
+  // );
 }
 
 // --- 桌面功能

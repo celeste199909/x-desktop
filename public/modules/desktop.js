@@ -16,12 +16,13 @@ window.getIconsByPath = function (path) {
   const pathName = path.name;
   return new Promise((resolve, reject) => {
     const desktopIcons = [];
+
+
     readdir(iconPath, (err, files) => {
       if (err) {
         reject(err);
         return;
       }
-
       files.forEach((file) => {
         // 或者快捷方式的真正路径
         const realPath = realpathSync(iconPath + "/" + file);

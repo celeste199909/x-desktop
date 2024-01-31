@@ -5,6 +5,8 @@ const { ipcRenderer } = require("electron");
 require("./modules/desktop");
 // steam
 require("./modules/steam");
+// browser
+require("./modules/browser");
 
 window.winId = "";
 
