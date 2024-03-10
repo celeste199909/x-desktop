@@ -152,10 +152,10 @@ const getHDAppIcon = (icon) => {
 }
 @keyframes icon-image-hover {
   0% {
-    transform: scale(0.9);
+    transform: scale(0.98);
   }
   50% {
-    transform: scale(1.1);
+    transform: scale(1.02);
   }
   100% {
     transform: scale(1);

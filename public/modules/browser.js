@@ -1,6 +1,4 @@
-const { readdir, realpathSync, readFileSync, statSync } = require("fs");
-const { ipcRenderer, shell } = require("electron");
-const { resolve } = require("path");
+const { readFileSync } = require("fs");
 
 // 获取 chrome 书签
 window.getChromeBookmarks = function () {
